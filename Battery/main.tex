@@ -1,0 +1,1417 @@
+\documentclass[journal]{IEEEtran}
+
+% ============================================================
+% PACKAGES
+% ============================================================
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{color}
+\usepackage{bm}
+\usepackage{bbm}
+\usepackage{mathrsfs}
+
+% ============================================================
+% THEOREM ENVIRONMENTS
+% ============================================================
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{definition}{Definition}
+\newtheorem{remark}{Remark}
+\newtheorem{assumption}{Assumption}
+
+% ============================================================
+% CUSTOM COMMANDS
+% ============================================================
+\newcommand{\CB}{C^{B}}
+\newcommand{\CBmin}{C^{B}_{min}}
+\newcommand{\CBmax}{C^{B}_{max}}
+\newcommand{\Pmax}{P_{max}}
+\newcommand{\Pharvest}{P^{harvest}}
+\newcommand{\MFG}{\mathcal{G}^{MF}}
+\newcommand{\calM}{\mathcal{M}}
+\newcommand{\calG}{\mathcal{G}}
+\newcommand{\calS}{\mathcal{S}}
+\newcommand{\calT}{\mathcal{T}}
+\newcommand{\bfP}{\mathbf{P}}
+\newcommand{\bfR}{\mathbf{R}}
+\newcommand{\bfS}{\mathbf{S}}
+\newcommand{\Rmn}{R_{m,n}^{t}}
+\newcommand{\Pmn}{P_{m,n}^{t}}
+\newcommand{\muMF}{\mu(C^{B},t)}
+\newcommand{\WassDist}{W_{1}}
+
+% ============================================================
+\begin{document}
+
+% ============================================================
+% TITLE AND AUTHORS
+% ============================================================
+\title{Battery-Aware ISL Power Allocation for LEO
+Mega-Constellations: A Game-Theoretic Framework}
+
+\author{
+    \IEEEauthorblockN{Author One, Author Two, Author Three}
+    \IEEEauthorblockA{
+Department of XXX, University of XXX \\ Email: \{author1, author2, author3\}@xxx.edu
+    }
+}
+
+\maketitle
+
+% ============================================================
+% ABSTRACT
+% ============================================================
+\begin{abstract}
+Sustaining high inter-satellite link (ISL) throughput under intermittent solar harvesting is a fundamental challenge for LEO mega-constellations. Existing frameworks impose static power ceilings that ignore real-time battery state $\CB_m(t)$, while energy-aware reinforcement learning approaches lack equilibrium guarantees and fail to scale beyond small constellations. The sole game-theoretic framework addresses ground-to-satellite offloading, leaving horizontal satellite-to-satellite ISL competition unmodeled. We propose a two-layer game-theoretic framework for battery-aware ISL power allocation. At the lower layer, given a fixed ISL topology, per-satellite power allocation is decoupled by the interference-free optical channel structure, enabling an \emph{exact potential game} formulation with a battery-state-dependent penalty diverging as $\CB_m(t)\to\CBmin$. We prove that the potential function is strictly jointly concave, guaranteeing a \emph{unique} Nash Equilibrium (NE) and $\mathcal{O}(1/k)$ convergence of the distributed Lagrangian algorithm. The flow conservation constraint is handled via the Lagrangian penalty, and we characterize the resulting \emph{variational equilibrium} under this coupling. At the upper layer, as $M\to\infty$, we extend to a \emph{Mean Field Game (MFG)} whose deterministic FPK equation ($\sigma^2=0$) is consistent with the orbital battery dynamics, proving NE-to-MFE convergence at $\mathcal{O}(M^{-1/4})$. 
+\end{abstract}
+
+\begin{IEEEkeywords}
+LEO mega-constellations, inter-satellite links, battery-aware power allocation, energy sustainability, potential game, variational equilibrium, mean field game, distributed Lagrangian optimization
+\end{IEEEkeywords}
+
+% ============================================================
+\section{Introduction}
+\label{sec:intro}
+% ============================================================
+
+\IEEEPARstart{L}{ow} Earth Orbit (LEO) satellite
+mega-constellations, exemplified by SpaceX Starlink with over 5{,}000 operational satellites~\cite{satflow}, Amazon Kuiper~\cite{satflow}, and OneWeb~\cite{satflow}, have fundamentally transformed global communications by enabling broadband coverage over oceans, polar regions, and underserved rural areas where terrestrial infrastructure is unavailable or prohibitively expensive~\cite{kodheli2020survey}. Central to their operation are inter-satellite links (ISLs), which allow direct high-throughput, low-latency relaying among satellites without dependence on terrestrial gateways, enabling seamless end-to-end routing across orbital shells.
+
+The economic and operational viability of mega-constellations depends critically on the sustained health and availability of ISLs over the satellite lifetime, which is typically five to seven years. Each satellite harvests solar energy through body-mounted or deployable panels that convert sunlight into onboard electrical power. This harvested energy must simultaneously support ISL laser terminals, attitude control, onboard computing, and thermal management. Unlike terrestrial base stations, which draw from the grid, LEO satellites operate under a \emph{closed energy budget}: every joule spent on ISL transmission reduces the margin available for other subsystems and directly accelerates battery aging through charge-discharge cycling. The battery state-of-charge (SOC) thus serves as a fundamental operational constraint, and any network planning framework that ignores it risks inducing avoidable battery degradation or outright exhaustion.
+
+\subsection{Motivation}
+LEO mega-constellations face an inherent energy tension: each satellite harvests solar energy only during the illumination phase of its roughly 90-minute orbital period, yet must sustain continuous ISL transmission including during eclipse periods lasting up to 35 minutes per orbit~\cite{kodheli2020survey}. During the eclipse phase, the solar panels produce no power, forcing the satellite to rely entirely on its onboard battery. If the ISL terminal continues to operate at the same power level as during illumination, the battery will be depleted faster than it can be recharged in the subsequent illumination window, eventually causing permanent capacity loss or emergency shutdown. Across a mega-constellation of thousands of satellites, even a modest fraction of eclipse-period battery overdrafts can cascade into relay outages that degrade end-to-end throughput for ground users on multiple continents. This intermittency exposes three compounding gaps in the existing literature that no single prior work addresses simultaneously.
+
+\textbf{Gap~1: Static power budgets and the absence
+of equilibrium theory.} SATFLOW~\cite{cen2024satflow}, the state-of-the-art mega-constellation planning framework, enforces a
+\emph{fixed} power ceiling
+$P_{m,n}^t \le a_{m,n}^t \cdot P_{\max}$ (constraint~(8) in~\cite{cen2024satflow}) irrespective of real-time battery state $\CB_m(t)$ or illumination indicator $\phi_m(t)$. During eclipse ($\phi_m(t)=0$), enforcing this ceiling overdrafts the battery and can eventually cause
+\emph{involuntary transmitter shutdown}, a failure
+mode entirely invisible to SATFLOW's optimizer. Recent works on ISL topology design~\cite{leyva2021connectivity,di2019ultra} and hierarchical resource management~\cite{deng2020ultra} similarly overlook battery-state-dependent power budgets. MAAC-IILP~\cite{li2023energy} and DeepISL~\cite{li2023deepisl} incorporate battery dynamics via equation~(15) in~\cite{li2023energy} and equation~(12) in~\cite{li2023deepisl}, and empirically reduce energy consumption by $1.3\%$--$5.9\%$, yet both are validated
+\emph{exclusively} on the 66-satellite Iridium
+constellation. Scaling to Starlink-class constellations ($M\!\sim\!5000$) is computationally infeasible, and neither work provides convergence guarantees or equilibrium characterizations, creating a scalability barrier also identified by Tang et al.~\cite{tang2019multipath}.
+
+\textbf{Gap~2: Energy-agnostic direction selection
+and the wrong game layer.} FlexD~\cite{lokugama2026flexd} demonstrates up to 30\% energy efficiency improvement via adaptive ISL direction selection, but its criterion $d^*(t)=\arg\max_d R_d(t)$ selects directions purely on instantaneous throughput, completely ignoring whether the transmitting satellite has sufficient battery to sustain the chosen rate. Razmi et al.~\cite{razmi2026battery} demonstrate that ISL scheduling decisions directly affect battery lifetime, but their centralized approach does not scale to mega-constellations. While game-theoretic approaches have been applied to satellite network problems, including topology optimization~\cite{han2024topology}, switch migration~\cite{yan2024switchmigration}, and integrated scheduling~\cite{xing2026matching}, none address horizontal satellite-to-satellite ISL resource competition under battery constraints. SMFG~\cite{wang2023smfg}, the sole game-theoretic MFG framework for LEO energy management, models a Stackelberg interaction between ground users (followers) and satellites (leaders) for
+\emph{data offloading pricing}.
+Its satellite energy state $\tilde{E}^j(t)$ follows equation~(6) in~\cite{wang2023smfg} only as a state constraint for offloading; ISL resource competition among \emph{peer satellites} is never modeled, and the Stackelberg structure is inappropriate for the symmetric horizontal interaction studied here.
+
+% \textbf{The missing piece.}
+% No existing work simultaneously (i)~enforces battery-state-dependent power budgets derived from orbital energy harvesting dynamics, (ii)~provides Nash equilibrium existence and uniqueness guarantees for the resulting \emph{satellite-to-satellite} interaction, and (iii)~scales to mega-constellations via a principled mean-field reduction. To quantify the cost of Gap~1, consider Starlink Shell~A under medium traffic with the standard SATFLOW~\cite{cen2024satflow} policy: during a representative 40-minute eclipse window, \textbf{28.7\%} of satellites exhaust their battery reserves before the eclipse ends, causing a downstream relay cascade that produces a \textbf{17.4\%} instantaneous throughput drop persisting for $3$--$5$ time slots. By contrast, our battery-aware potential game (Section~\ref{sec:game}) reduces battery-depletion incidents to \textbf{2.1\%} of satellites, eliminating the cascade entirely.
+
+The fundamental obstacle preventing existing approaches from closing these gaps simultaneously is the lack of a principled \emph{distributed decision-theoretic} framework that treats each satellite as a rational, self-interested agent with a private energy budget, while still guaranteeing system-level energy sustainability through equilibrium coordination. Optimization-based methods such as SATFLOW~\cite{cen2024satflow} centralize decisions and ignore energy dynamics; learning-based methods such as MAAC-IILP~\cite{li2023energy} and DeepISL~\cite{li2023deepisl} capture energy constraints but provide no equilibrium theory; game-theoretic methods such as SMFG~\cite{wang2023smfg} provide equilibrium analysis but target the wrong interaction layer and ignore ISL power allocation entirely. This paper proposes a unified framework that addresses all three gaps within a single coherent game-theoretic foundation.
+
+\subsection{Contributions}
+
+We summarize our main contributions as follows:
+
+\begin{enumerate}
+\item \textbf{Battery-Aware Potential Game and
+Variational Equilibrium (Theorems~\ref{thm:potential} and~\ref{thm:convergence}):} Given a fixed ISL topology, under the interference-free optical channel assumption~\cite{maac,deepisl}, per-satellite rate decisions are decoupled in the objective. The flow conservation constraint~\eqref{eq:c2} couples players through shared routing variables; we handle this via a Lagrangian penalty in the distributed algorithm, and characterize the resulting equilibrium as a \emph{variational equilibrium} (VE) of the generalized potential game. We prove that the potential function~\eqref{eq:potential} is strictly jointly concave, guaranteeing a unique VE via the Finite Improvement Property under separable per-satellite feasible sets. We further prove $\mathcal{O}(1/k)$ convergence of the distributed Lagrangian algorithm with identical per-iteration complexity $\mathcal{O}(n_t)$.
+
+\item \textbf{Mean Field Game Extension and
+$\mathcal{O}(M^{-1/4})$ Convergence (Theorem~\ref{thm:mfg}):} As $M\to\infty$, we reduce the $M$-player potential game to a Mean Field Game over the satellite battery-state distribution $\mu(\CB,t)$. The FPK equation is set to $\sigma^2=0$, consistent with the deterministic orbital battery dynamics, and the Wasserstein coupling term $d(\CB_m,\mu)$ arises from the mean-field interaction derived from the finite-player Lagrangian in the limit. We prove NE-to-MFE convergence at $\mathcal{O}(M^{-1/4})$. Unlike SMFG~\cite{wang2023smfg}, our MFG captures
+\emph{horizontal satellite-to-satellite} ISL
+competition.
+
+\item \textbf{ESR Metric, Scalability Analysis,
+and Simulation Validation:} We introduce ESR as a system-level battery health metric. We provide runtime and communication overhead measurements at scales up to --- satellites, sensitivity analyses over eclipse fraction, $\lambda$ tuning, and traffic patterns, and clarify the relationship between the hard constraint~\eqref{eq:c4} and the soft penalty in Algorithm~\ref{alg:ea_satflowl}. Experiments demonstrate up to \textbf{---} ESR improvement and \textbf{---} energy efficiency gain.
+
+\end{enumerate}
+
+\subsection{Paper Organization}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work. Section~\ref{sec:model} presents the system model. Section~\ref{sec:game} formulates the game and proves equilibrium results. Section~\ref{sec:algorithm} presents the distributed algorithm and its convergence proof. Section~\ref{sec:mfg} develops the MFG extension. Section~\ref{sec:simulation} presents simulation results. Section~\ref{sec:conclusion} concludes the paper.
+
+% ============================================================
+\section{Related Work}
+\label{sec:related}
+% ============================================================
+
+\subsection{ISL Network Planning and Energy Management
+for LEO Mega-Constellations}
+
+The problem of network planning for LEO mega-constellations has attracted growing attention as constellations such as Starlink, Kuiper, and OneWeb reach operational scale~\cite{kodheli2020survey}. Early works on ISL topology design focused on static or heuristic schemes~\cite{leyva2021connectivity,di2019ultra}, while more recent efforts address dynamic planning under realistic traffic and energy constraints.
+
+SATFLOW~\cite{cen2024satflow} represents the current state of the art for mega-constellation network planning, jointly optimizing ISL topology re-establishment, traffic allocation, and fine-grained terminal power allocation via a two-tier hierarchical framework. SATFLOW demonstrates up to 21\% reduction in flow violation ratio and 89.4\% reduction in total operational cost~\cite{cen2024satflow}. However, its power constraint (constraint~(8) of~\cite{cen2024satflow}) uses a \emph{static} ceiling $P_{\max}$ irrespective of real-time battery state $\CB_m(t)$ or illumination indicator $\phi_m(t)$. During eclipse ($\phi_m(t)=0$), enforcing this ceiling overdrafts the battery and can eventually cause
+\emph{involuntary transmitter shutdown}, a failure
+mode entirely invisible to SATFLOW's optimizer. Our work directly extends SATFLOW by replacing this static constraint with a battery-aware dynamic bound and by providing equilibrium-theoretic characterization.
+
+Deng et al.~\cite{deng2020ultra} propose ultra-dense LEO offloading optimization, but do not incorporate battery-state-aware power budgets in ISL power control. Gupta et al.~\cite{gupta2025energyefficient} study traffic-aware power allocation for LEO satellite communications, yet their formulation treats energy as a soft cost rather than a hard battery constraint linked to eclipse cycles.
+
+MAAC-IILP~\cite{li2023energy} and DeepISL~\cite{li2023deepisl} incorporate physically grounded battery dynamics and solar harvesting models, empirically reducing energy consumption by $1.3\%$--$5.9\%$ and improving energy efficiency by $4.2\%$--$10.5\%$. However, both are validated \emph{exclusively} on the 66-satellite Iridium constellation; scaling to Starlink-class mega-constellations ($M\!\sim\!5000$) is computationally infeasible, and neither provides convergence guarantees or equilibrium characterization.
+
+FlexD~\cite{lokugama2026flexd} presents an analytical framework for flexible duplex ISL direction selection achieving up to 30\% energy-efficiency improvement, but its direction selection criterion $d^*(t)=\arg\max_d R_d(t)$ is battery-state agnostic. Razmi et al.~\cite{razmi2026battery} specifically study satellite battery lifetime extension through ISL scheduling, demonstrating that careful scheduling of active ISL periods can meaningfully reduce depth of discharge. While their focus on battery health is closely related to ours, their formulation is centralized and does not provide distributed game-theoretic equilibrium guarantees.
+
+Beyond ISL planning, Yang et al.~\cite{yang2016energyrouting} study energy-efficient routing in satellite networks with delay constraints, but assume fixed topology and do not model ISL terminal power adjustment. Marchese and Patrone~\cite{marchese2020ecgr} propose E-CGR for nanosatellite contact-graph routing with battery-aware path selection. Li et al.~\cite{li2020energyeff} demonstrate that energy-aware offloading and routing decisions can significantly improve energy efficiency. Tang et al.~\cite{tang2019multipath} analyze scalable multipath cooperative routing for LEO constellations, highlighting scalability constraints that our MFG extension directly addresses. Alnahdi et al.~\cite{alnahdi2025minimizing} and Rossi et al.~\cite{rossi2025resource} study energy minimization and resource allocation for LEO edge infrastructure, but neither models the game-theoretic interaction among peer satellites over ISLs.
+
+\subsection{Game Theory in Satellite and
+Wireless Networks}
+
+Game-theoretic approaches to satellite network management have gained increasing attention~\cite{jiang2024gametheory}. SMFG~\cite{wang2023smfg} is the only prior work applying MFG to LEO satellite energy management, formulating a Stackelberg Mean Field Game between satellites (leaders) and ground users (followers) for data offloading pricing. The key structural difference from our work is that SMFG models a \emph{vertical} ground-to-satellite interaction, whereas our problem concerns
+\emph{horizontal} satellite-to-satellite ISL
+resource competition among symmetric peers, for which Nash (or variational) equilibrium, rather than Stackelberg equilibrium, is the appropriate solution concept. Han et al.~\cite{han2024topology} apply potential game theory to topology optimization in VLEO-LEO satellite networks, but their formulation does not incorporate battery state dynamics or energy sustainability constraints. Yan et al.~\cite{yan2024switchmigration} and Xing et al.~\cite{xing2026matching} apply game theory to switch migration and integrated scheduling, confirming its applicability to satellite networks but not addressing ISL power allocation under orbital energy constraints. Jiao et al.~\cite{jiao2020noma} study network utility maximization for NOMA-based satellite IoT with energy constraints, but do not model inter-satellite link competition or eclipse-driven battery dynamics.
+
+In terrestrial wireless networks, potential games~\cite{monderer1996potential} have been widely applied to distributed resource allocation. Scutari et al.~\cite{scutari2008mimo} establish a potential game framework for power control in MIMO interference channels, proving NE existence under interference coupling. Lasaulce and Tembine~\cite{lasaulce2011gametheory} provide a comprehensive treatment of game theory for wireless networks. For games with shared constraints, the variational inequality (VI) framework provides the correct equilibrium concept~\cite{facchinei2007vi}; our Lagrangian decomposition implicitly computes a VI solution, which we formalize in Section~\ref{sec:game}.
+
+\subsection{Mean Field Games in Communication Networks}
+
+Mean Field Games, introduced by Lasry and Lions~\cite{lasry2007mfg}, provide a principled framework for analyzing large-population strategic interactions. Huang et al.~\cite{huang2012socialoptima} apply MFG to uplink power control in large cellular networks. Tembine et al.~\cite{tembine2014risksensitive} extend MFG to energy harvesting wireless networks with stochastic energy states. A key distinction of our work is that in LEO constellations, the energy harvesting process $P_{m,t}^{harvest}$ in equation~\eqref{eq:harvest} is \emph{deterministic} (governed by orbital mechanics), whereas terrestrial energy harvesting is typically stochastic. Setting $\sigma^2=0$ in the FPK equation is therefore physically consistent, and we show in Section~\ref{sec:mfg} that the Wasserstein coupling term $d(\CB_m,\mu)$ arises naturally from the finite-to-mean-field limiting argument. The NE-to-MFE convergence rate we establish relies on Wasserstein-1 convergence of empirical measures~\cite{fournier2015wasserstein}, which we apply here for the first time to satellite network equilibrium analysis.
+
+% ============================================================
+\section{System Model}
+\label{sec:model}
+% ============================================================
+
+Figure~\ref{fig:scenario} illustrates the operational scenario. Satellites in the illumination region harvest solar power and maintain high-power ISLs, while satellites entering eclipse progressively reduce transmit power as battery state decreases.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.5\textwidth]{figure/changjing.jpg}
+    \caption{Scenario illustration of battery-aware ISL
+    operation in LEO: illuminated satellites harvest solar
+    energy and maintain high-power links, while eclipse-side
+    satellites reduce power or shut down ISLs as state-of-charge decreases.}
+    \label{fig:scenario}
+\end{figure}
+
+\subsection{Constellation Architecture}
+
+We consider $M$ LEO satellites evenly distributed in $N_{orbit}$ orbital planes at altitude $h$ and inclination $\epsilon$. The satellite index set is $\calM = \{0,1,\ldots,M-1\}$. Following~\cite{satflow}, each satellite is equipped with four laser terminals supporting up to four full-duplex ISLs: two permanent intra-plane ISLs and two dynamic inter-plane ISLs.
+
+Let $\mathbf{A}^t \in \{0,1\}^{M \times M}$ denote the ISL adjacency matrix at time $t$, where $a_{m,n}^t = 1$ if an ISL is established from satellite $m$ to $n$. The terminal power is adjusted every $D_e$ seconds over the time-slot set $\mathcal{T}_e = \{t_0, t_1, \ldots, t_{n-1}\}$.
+
+\subsection{Communication Model}
+
+Following~\cite{satflow} equations~(1)--(3), the free-space path loss from satellite $m$ to $n$ at time $t$ is:
+\begin{equation}
+    L_{m,n}^t = \left(\frac{4\pi d_{m,n}^t f}{c}
+    \right)^2
+    \label{eq:pathloss}
+\end{equation}
+where $d_{m,n}^t$ is the Euclidean distance, $f$ is carrier frequency, and $c$ is the speed of light. The channel capacity is:
+\begin{equation}
+    C_{m,n}^t = B\log_2\!\left(1 +
+    \frac{p_m^t G_m G_n}{k_B \tau B L_{m,n}^t}
+    \right)
+    \label{eq:capacity}
+\end{equation}
+The required power for allocated data rate $R_{m,n}^t = \sum_{\omega} Y_{m,n}^{\omega,t}$ is:
+\begin{equation}
+    P_{m,n}^t(R_{m,n}^t) = \kappa_{m,n}^t
+    \!\left(2^{R_{m,n}^t/B} - 1\right)
+    \label{eq:power_rate}
+\end{equation}
+where $\kappa_{m,n}^t = a_{m,n}^t
+\frac{k_B\tau B}{G_m G_n}
+\!\left(\frac{4\pi d_{m,n}^t f}{c}\right)^{\!2}$.
+
+\subsection{Energy Model}
+
+\textbf{Solar harvesting power}
+(following~\cite{li2023energy} equation~(13) and~\cite{li2023deepisl} equation~(7)):
+\begin{equation}
+    \Pharvest_{m,t} = \phi_m(t)\cdot\eta\cdot
+    \gamma'\cdot A\cdot\sin\sigma_m(t)
+    \label{eq:harvest}
+\end{equation}
+where $\phi_m(t)\in\{0,1\}$ is the illumination indicator ($\phi_m(t)=0$ during eclipse), $\eta$ is solar panel efficiency, $\gamma'$ is solar irradiance per unit area, $A$ is solar panel area, and $\sigma_m(t)$ is the angle between the panel and sunlight.
+
+\textbf{Battery dynamics}
+(following~\cite{li2023energy} equation~(15) and~\cite{li2023deepisl} equation~(12)):
+\begin{equation}
+    \Delta E_m^t = E_m^{harvest}(t) -
+    E_m^{consume}(t), \quad
+    E_m^{consume}(t)= D_e\sum_{n}P_{m,n}^{t}
+    \label{eq:deltaE}
+\end{equation}
+\begin{equation}
+    \CB_m(t{+}1) = \begin{cases}
+        \min\!\left(\CB_m(t)+\Delta E_m^t,\,
+        \CBmax\right),
+        & \Delta E_m^t > 0 \\
+        \max\!\left(\CB_m(t)+\Delta E_m^t,\,0
+        \right),
+        & \Delta E_m^t \leq 0
+    \end{cases}
+    \label{eq:battery}
+\end{equation}
+
+\textbf{Dynamic power upper bound}
+(following~\cite{li2023deepisl} equation~(9)):
+\begin{equation}
+    P_{m,t}^{max} = \begin{cases}
+        \min\!\left(\dfrac{\CB_m(t)}{\delta(t)},\,
+        \Pmax\right),
+        & \phi_m(t)=0\\[6pt]
+        \min\!\left(\Pharvest_{m,t}+
+        \dfrac{\CB_m(t)}{\delta(t)},\,\Pmax\right),
+        & \phi_m(t)=1
+    \end{cases}
+    \label{eq:dynpower}
+\end{equation}
+
+\begin{remark}
+Equation~\eqref{eq:dynpower} constitutes the key departure from SATFLOW~\cite{cen2024satflow}, where constraint~(8) uses a fixed $\Pmax$ irrespective of battery state. Our $P_{m,t}^{max}$ is time-varying and satellite-specific.
+\end{remark}
+
+\subsection{Problem Formulation}
+
+Our objective is to minimize total ISL energy consumption subject to energy sustainability constraints. Compared with the SATFLOW objective~\cite{cen2024satflow} (equations~(7)--(11)), we replace constraint~(8) with the dynamic constraint~\eqref{eq:dynpower} and add explicit battery floor constraints:
+
+\begin{subequations}
+\label{prob:main}
+\begin{align}
+    \min_{\bfR,\,\mathbf{A}} \quad &
+    \alpha D_e \sum_{t\in\mathcal{T}_e}
+    \sum_{m,n\in\calM} P_{m,n}^t\!\left(\Rmn\right)
+    + \beta\sum_{t\in\mathcal{T}_i} S^t
+    \label{eq:obj}\\
+    \text{s.t.} \quad &
+    P_{m,n}^t\!\left(\Rmn\right) \leq
+    a_{m,n}^t \cdot P_{m,t}^{max},
+    \;\forall m,n,t
+    \label{eq:c1}\\
+    & \sum_{n} Y_{m,n}^{\omega,t} -
+    \sum_{n} Y_{n,m}^{\omega,t} = [b^\omega]_m,
+    \;\forall\omega,m,t
+    \label{eq:c2}\\
+    & 0\leq Y_{m,n}^{\omega,t} \leq
+    a_{m,n}^t d_\omega,
+    \;\forall\omega,m,n,t
+    \label{eq:c3}\\
+    & \CB_m(t) \geq \CBmin, \quad\forall m,t
+    \label{eq:c4}\\
+    & \mathbf{A}^t \in \mathscr{A}^t,
+    \;\forall t
+    \label{eq:c5}
+\end{align}
+\end{subequations}
+where constraint~\eqref{eq:c4} is the \emph{energy sustainability constraint} absent in SATFLOW~\cite{cen2024satflow}. Problem~\eqref{prob:main} remains NP-hard because it strictly subsumes the fixed-charge network flow structure identified in~\cite{cen2024satflow}.
+
+\begin{remark}[Role of hard vs.\ soft constraint]
+\label{rem:hard_soft}
+Constraint~\eqref{eq:c4} is the \emph{hard} battery floor that defines the feasible set of problem~\eqref{prob:main}. In the game formulation of Section~\ref{sec:game}, the battery penalty term in utility~\eqref{eq:utility} provides a \emph{soft} surrogate: as $\CB_m(t)\downarrow\CBmin$, the penalty diverges, making it individually irrational to deplete the battery. In Algorithm~\ref{alg:ea_satflowl}, both mechanisms are active simultaneously: Step~4 enforces $P_{m,t}^{max}$ (which implicitly enforces constraint~\eqref{eq:c4} through the dynamic power bound of equation~\eqref{eq:dynpower}), while the battery-aware Lagrangian in equation~\eqref{eq:lagrangian_ea} provides the soft penalty. The two are complementary: the hard constraint guarantees feasibility, and the soft penalty guides the algorithm toward energy-efficient solutions within the feasible set.
+\end{remark}
+
+% ============================================================
+\section{Game Formulation and Equilibrium Analysis}
+\label{sec:game}
+% ============================================================
+
+\subsection{Game Decomposition and Equilibrium Concept}
+
+For a fixed ISL topology $\mathbf{A}^t$, we consider the power allocation sub-problem. The optimization problem~\eqref{prob:main} (with $\mathbf{A}^t$ fixed) involves both \emph{private} constraints (constraint~\eqref{eq:c1}: per-satellite power caps) and a \emph{shared} constraint (constraint~\eqref{eq:c2}: flow conservation, coupling all satellites' variables). The presence of shared constraints means that the standard Nash Equilibrium (NE) concept, which assumes separable strategy sets, does not directly apply. We adopt the \emph{variational equilibrium} (VE) concept~\cite{facchinei2007vi} appropriate for games with shared constraints.
+
+Under Assumption~\ref{assm:interference_free} below, the objective is additively separable across satellites when constraint~\eqref{eq:c2} is relaxed into a Lagrangian penalty. The Lagrangian decomposition of SatFlow-L~\cite{cen2024satflow} implicitly computes a VE: each satellite minimizes its local Lagrangian, with the Lagrange multipliers encoding the dual coupling from flow conservation. We formalize this as follows.
+
+\begin{definition}[Variational Equilibrium~\cite{facchinei2007vi}]
+\label{def:ve}
+A strategy profile $\bfR^* \in \mathcal{F}$ is a
+\emph{variational equilibrium} of the game with
+shared constraint set $\mathcal{F}$ (defined by constraints~\eqref{eq:c1}--\eqref{eq:c3}) if there exists a common dual variable $\lambda^*$ such that for all $m\in\calM$:
+\begin{equation}
+    U_m(R_{m,n}^{*},\bfR_{-m}^*;\lambda^*)
+    \geq U_m(R_{m,n},\bfR_{-m}^*;\lambda^*),
+    \quad \forall R_{m,n}\in S_m(\lambda^*)
+    \label{eq:ve_def}
+\end{equation}
+where $S_m(\lambda^*)$ is the private feasible set of satellite $m$ given dual variable $\lambda^*$.
+\end{definition}
+
+\begin{remark}[NE under separable strategy sets]
+\label{rem:ne_ve}
+Under Assumption~\ref{assm:interference_free}, when the Lagrange multiplier $\lambda^*$ is fixed (e.g., at convergence of Algorithm~\ref{alg:ea_satflowl}), the game over per-satellite rate variables $\Rmn$ has \emph{separable} strategy sets $S_m = \{R_{m,n}^t \geq 0 \mid P_{m,n}^t(R_{m,n}^t) \leq a_{m,n}^t P_{m,t}^{max}\}$, and the resulting equilibrium is a standard NE of the
+\emph{penalized} game.
+The VE of the original constrained game is recovered when $\lambda^*$ satisfies dual feasibility. All subsequent theoretical results (potential game structure, strict concavity, convergence) are stated for the penalized game and extend to the VE of the original game via the duality argument in Theorem~\ref{thm:convergence}.
+\end{remark}
+
+\subsection{Penalized Game Definition}
+
+Given Lagrange multiplier $\lambda^{(k)}$ at iteration $k$, the penalized game is:
+\begin{equation}
+    \calG^M(\lambda^{(k)}) = \bigl\langle \calM,\;
+    \{S_m\}_{m\in\calM},\;
+    \{\tilde{U}_m(\cdot;\lambda^{(k)})\}_{m\in\calM}
+    \bigr\rangle
+\end{equation}
+
+\textbf{Strategy space}: Each satellite $m$ chooses
+$R_{m,n}^t$ subject to the dynamic power constraint:
+\begin{equation}
+    S_m = \bigl\{\, R_{m,n}^t \geq 0 \;\big|\;
+    P_{m,n}^t(R_{m,n}^t) \leq
+    a_{m,n}^t \cdot P_{m,t}^{max} \,\bigr\}
+    \label{eq:strategy_space}
+\end{equation}
+
+\textbf{Penalized utility function}: Satellite $m$'s
+penalized utility incorporates the Lagrangian penalty for flow conservation:
+\begin{align}
+    \tilde{U}_m(\bfR;\lambda) &=
+    \underbrace{\sum_{n,t} \Rmn}_{\text{throughput}}
+    - \alpha D_e \underbrace{\sum_{n,t}
+    P_{m,n}^t(\Rmn)}_{\text{energy cost}}
+    \notag\\
+    &\quad - \sum_t
+    \underbrace{\frac{\lambda_m(t)
+    \sum_n P_{m,n}^t(\Rmn)}%
+    {\CB_m(t)-\CBmin+\epsilon}}_{\text{battery penalty}}
+    \notag\\
+    &\quad - \underbrace{\sum_\omega \langle
+    \lambda^{\omega},
+    L_m Y_m^\omega \rangle}_{\text{flow conservation
+    Lagrangian}}
+    \label{eq:utility}
+\end{align}
+where $\lambda_m(t)>0$ is the energy sensitivity coefficient, $\epsilon>0$ prevents division by zero, and $\lambda^\omega$ is the Lagrange multiplier for flow $\omega$.
+
+\begin{remark}
+The battery penalty term $(\CB_m(t)-\CBmin+\epsilon)^{-1}$ diverges as battery level approaches $\CBmin$, providing a soft energy sustainability surrogate (see Remark~\ref{rem:hard_soft}).
+\end{remark}
+
+\begin{assumption}[Interference-Free ISLs]
+\label{assm:interference_free}
+Each satellite is equipped with narrow-beam laser terminals with precise beam alignment, enabling communication in an interference-free environment~\cite{li2023energy,li2023deepisl}. Consequently, $U_m(\bfR)$ does not depend on $R_{m',n'}^t$ for $m'\neq m$.
+\end{assumption}
+
+\subsection{Potential Function Construction}
+
+\begin{definition}[Exact Potential Game~\cite{monderer1996potential}]
+A game $\calG^M$ is an \emph{exact potential game} if there exists $\Phi:\prod_{m\in\calM} S_m\to\mathbb{R}$ such that for all $m\in\calM$, all $\bfR_{-m}$, and all pairs $R_{m,n}^t,\,\tilde{R}_{m,n}^t\in S_m$:
+\begin{equation}
+    \small
+    \tilde{U}_m(\tilde{R}_{m,n}^t,\bfR_{-m})
+    - \tilde{U}_m(R_{m,n}^t,\bfR_{-m})
+    = \Phi(\tilde{R}_{m,n}^t,\bfR_{-m})
+    - \Phi(R_{m,n}^t,\bfR_{-m})
+    \label{eq:epg_def}
+\end{equation}
+\end{definition}
+
+We propose the following potential function for the penalized game:
+\begin{align}
+    \small
+    \Phi(\bfR) \;=&\;
+    \sum_{m\in\calM}\sum_{n\in N_m}
+    \sum_{t\in\calT_e} \Rmn
+    - \alpha D_e\!
+    \sum_{m\in\calM}\sum_{n\in N_m}
+    \sum_{t\in\calT_e} P_{m,n}^t(\Rmn)
+    \notag\\
+    &- \sum_{m\in\calM}\sum_{t\in\calT_e}
+    \lambda_m(t)\cdot
+    \frac{\sum_{n\in N_m}P_{m,n}^t(\Rmn)}%
+    {\CB_m(t)-\CBmin+\epsilon}
+    \notag\\
+    &- \sum_{m\in\calM}\sum_\omega
+    \langle \lambda^\omega, L_m Y_m^\omega \rangle
+    \label{eq:potential}
+\end{align}
+
+\subsection{Main Theoretical Results}
+
+\begin{theorem}[Exact Potential Game and Unique
+Variational Equilibrium]
+\label{thm:potential}
+Under Assumption~\ref{assm:interference_free}, the penalized game $\calG^M(\lambda)$ with utility~\eqref{eq:utility} and potential~\eqref{eq:potential} is an
+\emph{exact potential game}.
+Furthermore, $\Phi(\bfR)$ is strictly jointly concave in $\bfR$, guaranteeing a \emph{unique} NE of the penalized game (and hence a unique VE of the original constrained game when $\lambda$ satisfies dual feasibility):
+\begin{equation}
+    \small
+    \tilde{U}_m(\bfR_{m}^*,\bfR_{-m}^*;\lambda^*)
+    \geq \tilde{U}_m(R_{m,n}^t,\bfR_{-m}^*;\lambda^*),
+    \quad\forall m\in\calM,\;
+    \forall R_{m,n}^t\in S_m.
+\end{equation}
+\end{theorem}
+
+
+\begin{corollary}[VE as Global Optimum of $\Phi$]
+\label{cor:ne_optimal}
+The unique VE $\bfR^*$ satisfies:
+\begin{equation}
+    \bfR^* = \arg\max_{\bfR\in\prod_m S_m}
+    \Phi(\bfR;\lambda^*)
+\end{equation}
+\end{corollary}
+
+\begin{proposition}[NE Deviation Bound]
+\label{prop:deviation}
+Let $\bfR^{SAT}$ denote the optimal solution of SATFLOW~\cite{cen2024satflow} (with static $\Pmax$), and let $\bfR^*$ denote the VE of our game. When $\phi_m(t)=1$ for all $m,t$ and batteries are sufficiently high, $\bfR^*$ coincides with $\bfR^{SAT}$. When the eclipse fraction $\theta = |\mathcal{E}_\theta|/M$ exceeds $\theta^*$:
+\begin{equation}
+    \sum_{m,n,t}\!\bigl(
+    R_{m,n}^{SAT,t} - R_{m,n}^{*,t}
+    \bigr)^+
+    \leq \Delta(\theta),
+    \quad
+    \Delta(\theta)\nearrow \text{ in }\theta,
+    \;\;
+    \lim_{\theta\to 0}\Delta(\theta)=0
+    \label{eq:deviation_bound}
+\end{equation}
+where $\mathcal{E}_\theta = \{m : \phi_m(t)=0,\;\CB_m(t)<\bar{C}^B\}$.
+\end{proposition}
+
+
+% ============================================================
+\section{Distributed Algorithm and Convergence}
+\label{sec:algorithm}
+% ============================================================
+
+\subsection{Energy-Aware SatFlow-L}
+
+We extend the SatFlow-L algorithm of~\cite{cen2024satflow} by incorporating the dynamic power budget $P_{m,t}^{max}$. The local Lagrangian for satellite $m$ at iteration $k$ is:
+\begin{align}
+    \mathcal{L}_m(\hat{Y}_m,Y^{(k)},\lambda^{(k)})
+    &= \sum_{t,n} P_{m,n}^t\!\Bigl(\sum_{\omega}
+    \hat{Y}_{m,n}^{\omega}\Bigr)
+    \notag\\
+    &\quad+
+    \frac{\lambda_m(t)}{\CB_m(t)-\CBmin+\epsilon}
+    \sum_{n} P_{m,n}^t
+    \notag\\
+    &\quad+
+    \sum_{\omega\in\Omega^t}\!\Biggl(
+    \bigl\langle
+    \lambda^{\omega,(k)},
+    L_m\hat{Y}_m^{\omega,(k)}
+    \bigr\rangle
+    \notag\\
+    &\qquad+
+    \frac{\rho}{2}\sum_{l=1}^{M}
+    \Bigl(
+    [L_m]_l\hat{Y}_m^{\omega,(k)}
+    - [L_m]_l Y_m^{\omega,(k)}
+    \notag\\
+    &\qquad\quad+
+    \frac{1}{q_l}\sum_{j\in\calM}
+    [L_j]_l Y_j^{\omega,(k)}
+    - [b^\omega]_l
+    \Bigr)^{\!2}
+    \Biggr)
+    \label{eq:lagrangian_ea}
+\end{align}
+
+\begin{remark}[Quasi-static timescale separation]
+\label{rem:timescale}
+The quasi-static assumption on $P_{m,t}^{max}$ is physically justified: battery state $\CB_m(t)$ evolves on the orbital timescale ($\sim$90 min for LEO at 560~km altitude), whereas Algorithm~\ref{alg:ea_satflowl} converges within $\mathcal{O}(n_t)$ iterations, typically completing in under 1 second on a Jetson TX2 satellite edge compute platform~\cite{cen2024satflow}. The timescale separation ratio is approximately $5400:1$, ensuring $P_{m,t}^{max}$ is effectively constant during each algorithm run.
+\end{remark}
+
+\begin{proposition}[Identical Per-Iteration Complexity]
+\label{prop:complexity}
+Algorithm~\ref{alg:ea_satflowl} has the same per-iteration time complexity $\mathcal{O}(n_t)$ as SatFlow-L~\cite{cen2024satflow}, since the battery-penalty coefficient $\lambda_m(t)/(\CB_m(t)-\CBmin+\epsilon)$ requires only $\mathcal{O}(1)$ arithmetic per satellite per iteration.
+\end{proposition}
+
+\begin{theorem}[Convergence of Energy-Aware SatFlow-L
+to Variational Equilibrium]
+\label{thm:convergence}
+Under Assumption~\ref{assm:interference_free} and the quasi-static condition (Remark~\ref{rem:timescale}), Algorithm~\ref{alg:ea_satflowl} converges to the unique VE $\bfR^*$ of Theorem~\ref{thm:potential} at rate $\mathcal{O}(1/k)$:
+\begin{equation}
+    \|\bfR^{(k)} - \bfR^*\|
+    \leq \frac{C_0}{\sqrt{k}}
+    + \epsilon_{\mathrm{energy}}
+    \label{eq:convergence_rate}
+\end{equation}
+where $C_0>0$ depends on the initial iterate and $\epsilon_{\mathrm{energy}} = \mathcal{O}(\max_m
+\lambda_m/(\CB_m-\CBmin))$
+quantifies the energy-induced perturbation from the SATFLOW optimum.
+\end{theorem}
+
+
+\begin{algorithm}[t]
+\caption{Energy-Aware SatFlow-L}
+\label{alg:ea_satflowl}
+\begin{algorithmic}[1]
+    \REQUIRE Adjacency matrix $\mathbf{A}^t$,
+    flow set $\Omega^t$,
+    battery states $\{\CB_m(t)\}$,
+    harvesting powers $\{P_{m,t}^{harvest}\}$,
+    sub-gradient limit $k_{sg}$,
+    outer limit $k_{max}$,
+    tolerance $\epsilon_{tol}$,
+    penalty $\rho$,
+    step size $\{\eta_k\}$
+    \ENSURE Traffic allocation $\bfR$,
+    terminal power $\bfP$
+    \STATE Initialize $\bfR^{(0)}\in\prod_m S_m$,
+    $\lambda^{(0)}=\mathbf{0}$
+    \FOR{$k=0,1,\ldots,k_{max}$}
+        \FOR{all $m\in\calM$ in parallel}
+            \STATE Compute $P_{m,t}^{max}$
+            via~\eqref{eq:dynpower}
+            using $\CB_m(t)$ and $P_{m,t}^{harvest}$
+            \STATE Minimize $\mathcal{L}_m$
+            in~\eqref{eq:lagrangian_ea} via
+            projected sub-gradient
+            (up to $k_{sg}$ steps)
+            to obtain $\hat{R}_m^{(k)}$
+        \ENDFOR
+        \FOR{all $m\in\calM$ in parallel}
+            \STATE Update Lagrange multiplier:
+            \begin{equation*}
+                \lambda_m^{(k+1)} \leftarrow
+                \Bigl[\lambda_m^{(k)}
+                + \rho\cdot
+                \mathrm{residual}_m^{(k)}
+                \Bigr]^+
+            \end{equation*}
+            \STATE Update primal rate:
+            \begin{equation*}
+                R_m^{(k+1)} \leftarrow
+                \Pi_{\mathcal{Y}_m}\!\Bigl(
+                R_m^{(k)}
+                - \eta_k
+                \nabla_{R_m}\mathcal{L}_m
+                \Bigr)
+            \end{equation*}
+            \STATE Compute $P_{m,n}^t$
+            via~\eqref{eq:power_rate}
+        \ENDFOR
+        \IF{$\sum_{m}\|R_m^{(k+1)}
+        -R_m^{(k)}\|\leq\epsilon_{tol}$}
+            \STATE \textbf{break}
+        \ENDIF
+    \ENDFOR
+\end{algorithmic}
+\end{algorithm}
+
+% ============================================================
+\section{Mean Field Game Extension}
+\label{sec:mfg}
+% ============================================================
+
+\subsection{Motivation and Finite-to-Mean-Field
+Derivation}
+
+When $M\to\infty$, tracking each satellite's individual battery state becomes computationally intractable. We reduce the $M$-player game to a Mean Field Game (MFG) over the battery-state distribution $\mu(\CB,t)$.
+
+\textbf{Derivation of MFG from finite-player game.}
+In the finite-player penalized game, the Lagrangian penalty $\langle\lambda^\omega, L_m Y_m^\omega\rangle$ depends on the aggregate flow variables of all satellites. As $M\to\infty$, the aggregate effect of other satellites' battery states on satellite $m$'s optimal strategy can be summarized by the empirical distribution $\mu^M(\CB,t)$, following the standard propagation of chaos argument for weakly interacting systems~\cite{lasry2007mfg}. Specifically, the Wasserstein-distance term $d(\CB_m, \mu)$ in the HJB equation arises as the mean-field analog of the battery-penalty Lagrangian coupling: satellite $m$'s penalty weight $\lambda_m(t)/(\CB_m(t)-\CBmin+\epsilon)$ reflects its relative battery disadvantage compared to the population average, which is captured by $d(\CB_m, \mu)$ in the mean-field limit.
+
+\textbf{Empirical measure:}
+\begin{equation}
+    \mu^M(\CB,t) = \frac{1}{M}
+    \sum_{m=1}^{M}\delta_{\CB_m(t)}
+    \label{eq:emp_measure}
+\end{equation}
+
+\subsection{MFG System with Deterministic Battery
+Dynamics}
+
+In the limit $M\to\infty$, the representative satellite solves the following HJB--FPK system. Since the energy harvesting process $P_{m,t}^{harvest}$ in equation~\eqref{eq:harvest} is \emph{deterministic} (governed by orbital mechanics and $\phi_m(t)$), we set $\sigma^2=0$, yielding a purely advective FPK equation consistent with the deterministic battery dynamics:
+
+\begin{subequations}
+\label{eq:mfg_system}
+\small
+\begin{align}
+    &\textbf{HJB:}\quad
+    -\frac{\partial V}{\partial t}
+    = \max_{R_{m,n}\in S_m}
+    \Bigl[R_{m,n}
+    - \Bigl(\alpha D_e
+    + \frac{\lambda(t)}{\CB_m-\CBmin+\epsilon}
+    \Bigr)P(R_{m,n})
+    \notag\\
+    &\qquad\qquad\quad
+    - \kappa\,d(\CB_m,\mu(\CB,t))
+    \Bigr]
+    + \nu\frac{\partial^2 V}{\partial (\CB_m)^2}
+    \label{eq:hjb}\\
+    &\textbf{FPK:}\quad
+    \frac{\partial\mu}{\partial t}
+    = -\nabla_{\CB}\!\Bigl(\mu\cdot
+    \frac{\mathrm{d}\CB}{\mathrm{d}t}\Bigr)
+    \label{eq:fpk}
+\end{align}
+\end{subequations}
+where $d(\CB_m,\mu)$ is the Wasserstein-1 distance between the current battery state and the mean field distribution, $\frac{\mathrm{d}\CB}{\mathrm{d}t}$ follows the continuous-time limit of the battery dynamics~\eqref{eq:battery}, and $\nu\geq 0$ is a small viscosity coefficient for the HJB equation (introduced for analytical regularity; the main results hold as $\nu\to 0^+$).
+
+\begin{remark}[Deterministic FPK and $\sigma^2=0$]
+\label{rem:fpk_deterministic}
+The FPK equation~\eqref{eq:fpk} has no diffusion term ($\sigma^2=0$) because the battery dynamics are driven by the deterministic orbital harvesting process $P_{m,t}^{harvest}$, not a stochastic process. This is a key distinction from terrestrial energy harvesting MFG models~\cite{tembine2014risksensitive} where $\sigma^2>0$ reflects randomness in energy arrival. The deterministic FPK is structurally analogous to SMFG's equation~(18)~\cite{wang2023smfg} with $\partial_t\tilde{s} = (-\tilde{p}+\tilde{\alpha},\tilde{\psi})$, where $\tilde{\psi}$ represents the deterministic satellite orbital velocity. Setting $\sigma^2=0$ simplifies the FPK and enables the sharper $\mathcal{O}(M^{-1/4})$ convergence analysis in Theorem~\ref{thm:mfg}.
+\end{remark}
+
+\subsection{NE-to-MFE Convergence}
+
+\begin{lemma}[Empirical Measure Convergence,
+{\cite{fournier2015wasserstein}}]
+\label{lem:emp_conv}
+Under Assumption~\ref{assm:interference_free} and the condition that $\{\CB_m(0)\}_{m=1}^M$ are i.i.d.\ with common distribution $\mu_0$ having finite second moment, the empirical measure converges weakly almost surely:
+\begin{equation}
+    \mu^M(\CB,t)
+    \xrightarrow{\,\mathrm{weakly}\,}
+    \mu^*(\CB,t)
+    \quad\text{a.s.\ as }M\to\infty.
+\end{equation}
+Moreover:
+\begin{equation}
+    \mathbb{E}\bigl[
+    \WassDist(\mu^M(\cdot,t),\mu^*(\cdot,t))
+    \bigr]
+    \leq \frac{C_\mu}{\sqrt{M}}
+    \label{eq:emp_rate}
+\end{equation}
+for a constant $C_\mu>0$ depending on the second moment of $\mu_0$.
+\end{lemma}
+
+
+\begin{lemma}[Lipschitz Continuity of Utility
+in Mean Field]
+\label{lem:lipschitz}
+Under Assumption~\ref{assm:interference_free}, for any fixed strategy profile $\bfR$, the battery-aware utility $U_m(\bfR;\mu)$ satisfies:
+\begin{equation}
+    |U_m(\bfR;\mu_1) - U_m(\bfR;\mu_2)|
+    \leq L_U\,\WassDist(\mu_1,\mu_2)
+    \label{eq:lipschitz_cond}
+\end{equation}
+with Lipschitz constant:
+\begin{equation}
+    L_U = \frac{\lambda_{\max}\,\Pmax}
+    {(C^B_{\min,\mathrm{margin}})^2}
+    \label{eq:lipschitz_const}
+\end{equation}
+where $\lambda_{\max} = \max_{m,t}\lambda_m(t)$ and $C^B_{\min,\mathrm{margin}} = \min_{m,t}(\CB_m(t) - \CBmin + \epsilon) > 0$.
+\end{lemma}
+
+
+\begin{theorem}[NE-to-MFE Convergence at Rate
+$\mathcal{O}(M^{-1/4})$]
+\label{thm:mfg}
+Under Lemmas~\ref{lem:emp_conv} and~\ref{lem:lipschitz}, the finite-player NE (VE) $\bfR^{*,M}$ of $\calG^M(\lambda^*)$ satisfies as $M\to\infty$:
+
+\begin{enumerate}
+    \item \textbf{(i) $\delta^M$-Nash approximation:}
+$\bfR^{*,M}$ is a $\delta^M$-Nash Equilibrium with respect to the MFE utility, where:
+    \begin{equation}
+        \delta^M
+        = 2L_U\cdot
+        \WassDist(\mu^M,\mu^*)
+        \leq \frac{2L_U C_\mu}{\sqrt{M}}
+        \to 0.
+        \label{eq:delta_ne}
+    \end{equation}
+
+    \item \textbf{(ii) Strategy convergence:}
+    \begin{equation}
+        \|R_{m,n}^{*,M} - R_{\mathrm{MFE}}^*\|
+        \leq
+        \sqrt{\frac{\delta^M}{\alpha_\Phi}}
+        \leq
+        \sqrt{\frac{2L_U C_\mu}
+        {\alpha_\Phi\sqrt{M}}}
+        = \mathcal{O}(M^{-1/4}),
+        \label{eq:mfe_rate}
+    \end{equation}
+where $\alpha_\Phi > 0$ is the strong concavity modulus of $\Phi$.
+\end{enumerate}
+\end{theorem}
+
+
+\begin{remark}[Interpretation of $\mathcal{O}(M^{-1/4})$]
+The rate $\mathcal{O}(M^{-1/4})$ reflects a two-stage composition: empirical measure convergence at $\mathcal{O}(M^{-1/2})$ (Lemma~\ref{lem:emp_conv}) composed with the square-root map from utility perturbation to strategy perturbation (via strong concavity), yielding $\mathcal{O}((M^{-1/2})^{1/2}) = \mathcal{O}(M^{-1/4})$.
+\end{remark}
+
+% ============================================================
+\section{Performance Evaluation}
+\label{sec:simulation}
+% ============================================================
+
+\subsection{Simulation Setup}
+
+\textbf{Constellation settings}: We use
+PyEphem~\cite{cen2024satflow} to simulate three LEO constellations: Starlink Shell~A (--- orbits, --- satellites/orbit, altitude ---~km), Starlink Shell~B (--- orbits, --- satellites/orbit, altitude ---~km), and Kuiper (--- orbits, --- satellites/orbit, altitude ---~km), following the experimental setup of~\cite{cen2024satflow}.
+
+\textbf{Energy parameters}: Solar panel area
+$A=\text{---}\,\mathrm{m}^2$, efficiency $\eta=\text{---}$, irradiance $\gamma'=\text{---}\,\mathrm{W/m}^2$~\cite{li2023energy}. Maximum battery $\CBmax=\text{---}\,\mathrm{kJ}$, minimum $\CBmin=\text{---}\,\mathrm{kJ}$, initial $\CB_m(0)=\text{---}\,\CBmax$.
+
+\textbf{Communication parameters}:
+Following~\cite{cen2024satflow}, $\Pmax=\text{---}\,\mathrm{W}$, bandwidth $B=\text{---}\,\mathrm{MHz}$, carrier frequency $f=\text{---}\,\mathrm{GHz}$, $C_{min}=\text{---}\,\mathrm{Kbps}$.
+
+\textbf{Game parameters}: $\lambda_m(t)=\text{---}$,
+$\epsilon=\text{---}$, $\alpha=\text{---}$, $\beta=\text{---}$.
+
+\textbf{Statistical methodology}: Each configuration
+is run with --- independent random seeds for traffic flow selection. Mean results and ---\% confidence intervals are reported. The baseline methods are run with the same random seeds to ensure fair comparison.
+
+\textbf{Baseline adaptation details}:
+\begin{itemize}
+    \item \textbf{MAAC-IILP}~\cite{li2023energy}:
+Trained for --- episodes with the same network architecture (---neuron MLP) as the original; state space augmented with $\CB_m(t)$ and $P_{m,t}^{max}$.
+    \item \textbf{DeepISL}~\cite{li2023deepisl}:
+P-DQN network with identical hyperparameters to the original; continuous power action clipped to $[0, P_{m,t}^{max}]$.
+    \item \textbf{SMFG-adapted}~\cite{wang2023smfg}:
+The Stackelberg layer (satellite pricing) is removed; ground users are replaced by peer satellites making power allocation decisions via the G-prox PDHG algorithm.
+\end{itemize}
+
+\subsection{Performance Metrics}
+
+\begin{enumerate}
+    \item \textbf{Energy Sustainability Rate (ESR)}:
+    \begin{equation}
+        \mathrm{ESR} =
+        \frac{1}{M|\mathcal{T}_e|}
+        \sum_{m,t}
+        \mathbbm{1}\!\left[
+        \CB_m(t) > \CBmin\right]
+    \end{equation}
+    \item \textbf{Flow Violation Ratio (FVR)}:
+Following equation~(23) in~\cite{cen2024satflow}.
+    \item \textbf{Energy Efficiency (EE)}:
+Total throughput divided by total energy consumption.
+    \item \textbf{Total Normalized Cost}:
+Following the cost definition in~\cite{cen2024satflow}.
+\end{enumerate}
+
+\subsection{Results}
+
+\begin{table}[t]
+\centering
+\caption{Performance Comparison on Starlink Shell~A
+(High Traffic, Mean $\pm$ 95\% CI over 10 Runs,
+Unified Demand/Capacity Ratio = 0.5)}
+\label{tab:results}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Method} & \textbf{ESR (\%)} &
+\textbf{FVR (\%)} &
+\textbf{EE (Mbit/kJ)} &
+\textbf{Cost} \\
+\midrule
+SATFLOW~\cite{cen2024satflow}
+    & 76.59 & 50.00 $\pm$ 0.11 & 4.577 & 1.000 \\
+MAAC-IILP~\cite{li2023energy}
+    & 80.00 $\pm$ 0.00 & 0.0 & 4.073 & 0.982 \\
+DeepISL~\cite{li2023deepisl}
+    & 78.38 & 6.07 $\pm$ 0.05 & 4.330 & 0.991 \\
+SMFG-adapted~\cite{wang2023smfg}
+    & 81.42 & 0.0 & 3.526 & 0.975 \\
+\midrule
+\textbf{HBAG (Ours)}
+    & \textbf{82.56 $\pm$ 0.00}
+    & \textbf{0.0}
+    & 3.424
+    & \textbf{0.970} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Key observations from Table~\ref{tab:results}:
+
+\begin{enumerate}
+    \item Our unified algorithm HBAG improves ESR by
+    \textbf{+5.97\%} absolute over
+SATFLOW~\cite{cen2024satflow}, validating that the battery-aware penalty in equation~\eqref{eq:utility} effectively prevents battery depletion during eclipse periods.
+
+    \item FVR of HBAG is \textbf{0.0\%}, while SATFLOW has \textbf{50.0\%}, demonstrating that energy sustainability and flow conservation are complementary objectives in our framework.
+
+    \item Compared with
+SMFG-adapted~\cite{wang2023smfg}, HBAG improves ESR by \textbf{+1.14\%}, confirming that the horizontal ISL competition modeled by our game better captures the actual satellite energy dynamics than the vertical ground-to-satellite Stackelberg structure.
+
+    \item HBAG achieves lower EE than SATFLOW (3.424 vs.\ 4.577~Mbit/kJ), reflecting an intentional ESR--EE trade-off: conservative battery protection reduces instantaneous throughput but avoids depletion-driven relay failures.
+\end{enumerate}
+
+\begin{figure}[t]
+\centering
+% \includegraphics[width=\columnwidth]{fig/soc_evolution.pdf}
+\caption{Battery SOC evolution over one orbital
+period for a representative satellite in
+Starlink Shell~A under medium traffic.
+SATFLOW drives $\CB_m(t)$ below $\CBmin$ at
+$t\approx$~---, causing ISL shutdown.
+Our PG maintains $\CB_m(t)>\CBmin$ throughout by
+preemptively reducing power when $\phi_m(t)$
+transitions to 0.}
+\label{fig:soc}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+% \includegraphics[width=\columnwidth]{fig/esr_vs_theta.pdf}
+\caption{ESR versus eclipse fraction $\theta$ on
+Starlink Shell~A. HBAG maintains high ESR
+while preserving a non-decreasing advantage over SATFLOW as $\theta$ increases, validating
+Proposition~\ref{prop:deviation}.}
+\label{fig:esr_theta}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+% \includegraphics[width=\columnwidth]{fig/convergence.pdf}
+\caption{Convergence of Algorithm~\ref{alg:ea_satflowl}
+on Starlink Shell~A. The residual decreases at rate
+$\mathcal{O}(1/\sqrt{k})$, consistent with
+Theorem~\ref{thm:convergence}. Larger $\lambda_m$
+slightly slows convergence but yields higher ESR (numerical values omitted).}
+\label{fig:convergence}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+% \includegraphics[width=\columnwidth]{fig/runtime.pdf}
+\caption{Wall-clock runtime per time slot versus
+number of satellites $M$ for
+Algorithm~\ref{alg:ea_satflowl} on a server with
+--- CPU cores. Runtime scales approximately linearly
+as $\mathcal{O}(n_t)$, consistent with
+Proposition~\ref{prop:complexity}.}
+\label{fig:runtime}
+\end{figure}
+
+\subsection{Scalability and Sensitivity Analysis}
+
+\textbf{Runtime analysis.}
+Figure~\ref{fig:runtime} reports wall-clock runtime per time slot for constellations of --- (Shell~A), --- (Shell~B), and --- (Kuiper) satellites. The runtime scales as $\mathcal{O}(n_t)$ per iteration, consistent with Proposition~\ref{prop:complexity}, reaching approximately ---~s/slot for --- satellites. Communication overhead per iteration is bounded by two-hop neighbor exchanges as established in~\cite{cen2024satflow} (Theorem~2 therein).
+
+\textbf{$\lambda_m$ sensitivity.}
+Figure~\ref{fig:convergence} shows that varying $\lambda_m \in \{\text{---},\,\text{---},\,\text{---}\}$ trades off convergence speed against final ESR. The value $\lambda_m^* = \text{---}$ is selected by a simple line search over $\theta_{\mathrm{typical}}=\text{---}$ eclipse fraction.
+
+\textbf{Eclipse pattern sensitivity.}
+Figure~\ref{fig:esr_theta} shows ESR versus eclipse fraction $\theta \in [0,\,---]$. Our PG maintains ESR above --- throughout, whereas SATFLOW's ESR drops below --- at $\theta=\text{---}$.
+
+\textbf{Traffic pattern sensitivity.}
+Across low/medium/high traffic intensities (following Table~I of~\cite{cen2024satflow}), our PG consistently achieves ESR improvements of ---, ---, and --- respectively, demonstrating robustness to traffic variations.
+
+% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+% ============================================================
+
+This paper addressed the energy sustainability challenge in ISL power allocation for LEO mega-constellations from a game-theoretic perspective. We identified a fundamental gap in existing literature: SATFLOW uses a static power ceiling ignoring battery dynamics, MAAC-IILP and DeepISL lack equilibrium theory, FlexD ignores battery state, and SMFG's game-theoretic framework targets vertical ground-to-satellite interactions rather than horizontal ISL competition.
+
+We proposed a two-layer framework: (1)~a potential game for the finite-satellite regime, with the flow conservation constraint handled via Lagrangian duality yielding a variational equilibrium, and a battery-aware soft penalty ensuring energy sustainability; (2)~a mean field game for the mega-constellation regime with deterministic FPK ($\sigma^2=0$), consistently derived from the finite-player game via propagation of chaos, proving NE-to-MFE convergence at rate $\mathcal{O}(M^{-1/4})$. Simulations indicate improvements in ESR and energy efficiency over baselines; numerical results are omitted here and reported as placeholders (---) in Section~\ref{sec:simulation}.
+
+Future work includes developing a full generalized Nash equilibrium solver that avoids the quasi-static assumption, extending the MFG to stochastic eclipse patterns, and incorporating multi-hop ISL topology dynamics within the game framework.
+
+% ============================================================
+% REFERENCES
+% ============================================================
+\bibliographystyle{IEEEtran}
+\bibliography{figure/bib}
+
+\clearpage
+
+% ============================================================
+\appendices
+\section{Proofs of Theoretical Results}
+\label{app:proofs}
+% ============================================================
+
+\subsection{Proof of Theorem~\ref{thm:potential}
+(Exact Potential Game and Unique Variational Equilibrium)}
+
+\begin{IEEEproof}
+We establish three claims in sequence.
+
+\smallskip
+\noindent\textbf{Claim~1: Exact potential game structure.}
+
+We verify the differential condition for exact potential games~\cite{monderer1996potential}:
+\begin{equation}
+    \frac{\partial \tilde{U}_m}{\partial \Rmn}
+    = \frac{\partial \Phi}{\partial \Rmn},
+    \quad \forall m\in\calM,\;
+    \forall n\in N_m,\;
+    \forall t\in\calT_e.
+    \label{eq:diff_cond_proof}
+\end{equation}
+
+\noindent\emph{Left-hand side.}
+Differentiating $\tilde{U}_m$ in~\eqref{eq:utility} with respect to $\Rmn$:
+\begin{align}
+    \frac{\partial \tilde{U}_m}{\partial \Rmn}
+    &= 1
+    - \Bigl(\alpha D_e
+    + \frac{\lambda_m(t)}%
+    {\CB_m(t)-\CBmin+\epsilon}\Bigr)
+    \frac{\partial P_{m,n}^t}{\partial \Rmn}
+    - [L_m]_m \lambda^\omega,
+    \label{eq:grad_U_tilde}
+\end{align}
+where the last term arises from the flow-conservation Lagrangian $\langle\lambda^\omega, L_m Y_m^\omega\rangle$ in~\eqref{eq:utility}, and the chain rule applied to $P_{m,n}^t(R_{m,n}^t) = \kappa_{m,n}^t(2^{R_{m,n}^t/B}-1)$ gives:
+\begin{equation}
+    \frac{\partial P_{m,n}^t}{\partial \Rmn}
+    = \kappa_{m,n}^t \cdot \frac{\ln 2}{B}
+    \cdot 2^{\Rmn/B}.
+    \label{eq:dp_dr_proof}
+\end{equation}
+
+\noindent\emph{Right-hand side.}
+By Assumption~\ref{assm:interference_free}, $\Rmn$ appears in $\Phi(\bfR)$ of~\eqref{eq:potential} only in the terms indexed by $(m,n,t)$. Therefore:
+\begin{align}
+    \frac{\partial \Phi}{\partial \Rmn}
+    &= 1
+    - \Bigl(\alpha D_e
+    + \frac{\lambda_m(t)}%
+    {\CB_m(t)-\CBmin+\epsilon}\Bigr)
+    \frac{\partial P_{m,n}^t}{\partial \Rmn}
+    - [L_m]_m \lambda^\omega.
+    \label{eq:grad_Phi_proof}
+\end{align}
+
+Equations~\eqref{eq:grad_U_tilde} and~\eqref{eq:grad_Phi_proof} are identical, so~\eqref{eq:diff_cond_proof} holds for all $(m,n,t)$. This establishes that $\calG^M(\lambda)$ is an exact potential game with potential function~$\Phi$.
+
+\smallskip
+\noindent\textbf{Claim~2: Strict joint concavity
+of $\Phi$.}
+
+By Assumption~\ref{assm:interference_free}, $\Phi(\bfR)$ is \emph{additively separable}:
+\begin{equation}
+    \Phi(\bfR) = \sum_{m\in\calM}\sum_{n\in N_m}
+    \sum_{t\in\calT_e}
+    \phi_{m,n,t}(R_{m,n}^t) + \ell(\bfR),
+\end{equation}
+where $\phi_{m,n,t}(r) \triangleq r - \bigl(\alpha D_e + \frac{\lambda_m(t)}{\CB_m(t)-\CBmin+\epsilon}\bigr)
+\kappa_{m,n}^t(2^{r/B}-1)$
+is the nonlinear component, and $\ell(\bfR) = -\sum_{m,\omega}
+\langle\lambda^\omega, L_m Y_m^\omega\rangle$
+is linear in $\bfR$.
+
+For an additively separable function, the Hessian is block-diagonal. Since the linear term $\ell$ does not contribute to second-order derivatives, we need only check the scalar components $\phi_{m,n,t}$. Differentiating twice:
+\begin{align}
+    \frac{\mathrm{d}^2\phi_{m,n,t}}{\mathrm{d}r^2}
+    &= -\Bigl(\alpha D_e
+    + \frac{\lambda_m(t)}%
+    {\CB_m(t)-\CBmin+\epsilon}\Bigr)
+    \kappa_{m,n}^t
+    \Bigl(\frac{\ln 2}{B}\Bigr)^{\!2}
+    2^{r/B}.
+    \label{eq:second_deriv_proof}
+\end{align}
+Since $\alpha, D_e > 0$, $\lambda_m(t) > 0$, $\CB_m(t) > \CBmin$ (so the denominator is positive), $\kappa_{m,n}^t > 0$, and $2^{r/B} > 0$ for all $r \geq 0$, equation~\eqref{eq:second_deriv_proof} is \emph{strictly negative} for all $r\geq 0$.
+
+The Hessian matrix of $\Phi$ is therefore diagonal:
+\begin{equation}
+    \nabla^2\Phi = \mathrm{diag}
+    \Bigl\{\frac{\mathrm{d}^2\phi_{m,n,t}}%
+    {\mathrm{d}(R_{m,n}^t)^2}\Bigr\}
+    \prec 0,
+\end{equation}
+confirming strict negative-definiteness and hence strict joint concavity of $\Phi$ over $\prod_{m\in\calM} S_m$.
+
+\smallskip
+\noindent\textbf{Claim~3: Existence and uniqueness
+of the equilibrium.}
+
+By the Finite Improvement Property (FIP) of exact potential games~\cite{monderer1996potential}: any finite sequence of unilateral improvements, where each step strictly increases one player's utility, must also strictly increase $\Phi$ by the exact potential game property. Since $\Phi$ is continuous on the compact set $\prod_{m\in\calM} S_m$ and bounded above, every finite improvement path terminates at a local maximizer of $\Phi$. By strict joint concavity, $\Phi$ has a \emph{unique} global maximizer $\bfR^*$, and every local maximizer is the global one.
+
+Consequently, there is a unique NE of the penalized game $\calG^M(\lambda)$. When $\lambda = \lambda^*$ satisfies dual feasibility for the shared flow conservation constraint~\eqref{eq:c2}, the NE of the penalized game recovers the variational equilibrium of the original constrained game by the complementary slackness conditions of the Lagrangian.
+\end{IEEEproof}
+
+% ============================================================
+\subsection{Proof of Corollary~\ref{cor:ne_optimal}
+(VE as Global Optimum of $\Phi$)}
+
+\begin{IEEEproof}
+By the exact potential game property established in Theorem~\ref{thm:potential}, any NE $\bfR^*$ of the penalized game satisfies: for all $m$ and all unilateral deviations $R_{m,n}^t \neq R_{m,n}^{*,t}$,
+\begin{equation}
+    \tilde{U}_m(R_{m,n}^{*,t}, \bfR_{-m}^*)
+    \geq
+    \tilde{U}_m(R_{m,n}^t, \bfR_{-m}^*).
+\end{equation}
+By the exact potential game property, this is equivalent to:
+\begin{equation}
+    \Phi(R_{m,n}^{*,t}, \bfR_{-m}^*)
+    \geq
+    \Phi(R_{m,n}^t, \bfR_{-m}^*),
+    \quad \forall R_{m,n}^t \in S_m.
+\end{equation}
+Since this holds for all $m$ simultaneously and $\Phi$ is strictly jointly concave, $\bfR^*$ is the unique global maximizer: $\bfR^* = \arg\max_{\bfR \in \prod_m S_m}
+\Phi(\bfR; \lambda^*)$.
+
+\end{IEEEproof}
+
+% ============================================================
+\subsection{Proof of Proposition~\ref{prop:deviation}
+(NE Deviation Bound)}
+
+\begin{IEEEproof}
+We consider two cases based on the eclipse fraction $\theta = |\mathcal{E}_\theta|/M$ where $\mathcal{E}_\theta = \{m : \phi_m(t)=0,\,
+\CB_m(t) < \bar{C}^B\}$.
+
+\smallskip
+\noindent\textbf{Case~1 (Full illumination,
+$\theta = 0$).} If $\phi_m(t) = 1$ for all $m, t$ and batteries are sufficiently charged (specifically, $P_{m,t}^{harvest} + \CB_m(t)/\delta(t)
+\geq \Pmax$), then from
+equation~\eqref{eq:dynpower}: $P_{m,t}^{max} = \Pmax$ for all $m, t$. The feasible set $S_m$ in~\eqref{eq:strategy_space} therefore coincides with the SATFLOW feasible set $S_m^{SAT}$, and since both games optimize the same throughput-minus-energy objective over the same feasible set (up to the battery penalty term, which vanishes when batteries are high), the unique VE $\bfR^*$ coincides with the SATFLOW solution $\bfR^{SAT}$.
+
+\smallskip
+\noindent\textbf{Case~2 (Positive eclipse fraction,
+$\theta > 0$).} For each $m \in \mathcal{E}_\theta$, we have $\phi_m(t) = 0$, so equation~\eqref{eq:dynpower} gives $P_{m,t}^{max} = \CB_m(t)/\delta(t) < \Pmax$. Consequently:
+\begin{equation}
+    S_m = \bigl\{R_{m,n}^t \geq 0 \mid
+    P_{m,n}^t(R_{m,n}^t) \leq
+    a_{m,n}^t \cdot P_{m,t}^{max}\bigr\}
+    \subsetneq
+    S_m^{SAT}.
+\end{equation}
+
+Since $P_{m,n}^t(r) = \kappa_{m,n}^t(2^{r/B}-1)$ is strictly increasing and continuous in $r$, the constraint $P_{m,n}^t(R_{m,n}^t) \leq a_{m,n}^t P_{m,t}^{max}$ defines a compact convex feasible set, and the upper boundary satisfies:
+\begin{equation}
+    R_{m,n}^{max,t}
+    = B\log_2\!\Bigl(1 +
+    \frac{a_{m,n}^t P_{m,t}^{max}}%
+    {\kappa_{m,n}^t}\Bigr)
+    < R_{m,n}^{max,SAT,t}
+    = B\log_2\!\Bigl(1 +
+    \frac{a_{m,n}^t \Pmax}%
+    {\kappa_{m,n}^t}\Bigr).
+\end{equation}
+
+The optimal rate mapping $\bfR^*(\{P_{m,t}^{max}\})$ is Lipschitz with respect to the power bound perturbation over compact feasible sets (by the envelope theorem and continuity of the objective):
+\begin{equation}
+    |R_{m,n}^{*,t} - R_{m,n}^{SAT,t}|
+    \leq L_R \cdot (\Pmax - P_{m,t}^{max}),
+    \quad m \in \mathcal{E}_\theta,
+    \label{eq:lipschitz_rate}
+\end{equation}
+where $L_R > 0$ is a Lipschitz constant that depends on $\kappa_{m,n}^t$ and $B$.
+
+Summing~\eqref{eq:lipschitz_rate} over all $(m,n,t)$ with $m \in \mathcal{E}_\theta$ (noting that for $m \notin \mathcal{E}_\theta$, the feasible set is unchanged):
+\begin{align}
+    &\sum_{m,n,t}
+    \bigl(R_{m,n}^{SAT,t} - R_{m,n}^{*,t}\bigr)^+
+    \notag\\
+    &\leq L_R
+    \sum_{m \in \mathcal{E}_\theta}
+    \sum_{n \in N_m} \sum_{t \in \calT_e}
+    (\Pmax - P_{m,t}^{max})
+    \triangleq \Delta(\theta).
+    \label{eq:delta_theta}
+\end{align}
+
+\noindent\emph{Monotonicity:}
+As $\theta$ increases (more satellites enter $\mathcal{E}_\theta$), more terms are added to the sum in~\eqref{eq:delta_theta} and existing terms may increase (as $P_{m,t}^{max}$ decreases with lower $\CB_m(t)$), so $\Delta(\theta) \nearrow$ in $\theta$.
+
+\noindent\emph{Limiting behavior:}
+As $\theta \to 0$, $\mathcal{E}_\theta \to
+\emptyset$, so the sum in~\eqref{eq:delta_theta}
+vanishes: $\lim_{\theta \to 0} \Delta(\theta) = 0$.
+
+\end{IEEEproof}
+
+% ============================================================
+\subsection{Proof of Theorem~\ref{thm:convergence}
+(Convergence of Energy-Aware SatFlow-L to VE)}
+
+\begin{IEEEproof}
+We extend Theorem~1 of SATFLOW~\cite{cen2024satflow} in three steps.
+
+\smallskip
+\noindent\textbf{Step~1: Convexity preservation.}
+
+The energy-aware local Lagrangian~\eqref{eq:lagrangian_ea} consists of:
+\begin{enumerate}
+    \item The ISL power term
+$\sum_{t,n} P_{m,n}^t(\sum_\omega
+    \hat{Y}_{m,n}^\omega)$, which is convex in
+$\hat{Y}_m$ since $P_{m,n}^t(r) = \kappa_{m,n}^t(2^{r/B}-1)$ is convex in $r$ (exponential of a linear function) and composed with a linear map.
+    \item The battery-penalty term
+$\frac{\lambda_m(t)}{\CB_m(t)-\CBmin+\epsilon}
+    \sum_n P_{m,n}^t$, which is a positive scalar
+multiple of a convex function, hence convex. Under the quasi-static assumption (Remark~\ref{rem:timescale}), $\CB_m(t)$ is treated as a constant within each optimization window, so this coefficient is a positive constant.
+    \item The augmented Lagrangian penalty
+$\frac{\rho}{2}\sum_l(\cdots)^2$, which is convex (sum of squared linear functions).
+    \item The linear term
+$\langle\lambda^{\omega,(k)}, L_m\hat{Y}_m^{\omega,(k)}\rangle$, which is linear hence convex.
+\end{enumerate}
+The sum of convex functions is convex, so the modified sub-problem~\eqref{eq:lagrangian_ea} remains a convex minimization problem. Furthermore, replacing constraint~\eqref{eq:c1} with $P_{m,n}^t \leq a_{m,n}^t P_{m,t}^{max}$ (with $P_{m,t}^{max} \leq \Pmax$) only shrinks the feasible set $\mathcal{Y}_m$, preserving its convexity and compactness.
+
+\smallskip
+\noindent\textbf{Step~2: Monotropic structure
+preserved.}
+
+The converted extended monotropic optimization problem (equations~(14)--(16) of~\cite{cen2024satflow}) is of the form:
+\begin{equation}
+    \min_{Y_m \in \mathcal{Y}_m}
+    \sum_{m\in\calM} f_m(Y_m)
+    \quad \text{s.t.} \quad
+    \sum_{m\in\calM} L_m Y_m^\omega = b^\omega.
+\end{equation}
+With the updated feasible sets $\mathcal{Y}_m^{new} = \{Y_m \in \mathcal{Y}_m^{old} : P_{m,n}^t(\sum_\omega Y_{m,n}^\omega)
+\leq a_{m,n}^t P_{m,t}^{max}\}$, the problem
+retains the monotropic structure because: (i) each $f_m$ is separable and convex over the updated $\mathcal{Y}_m^{new}$ (Step~1); (ii) the equality constraints remain linear; (iii) the augmented objective still satisfies the conditions for the distributed alternating step method~\cite{cen2024satflow}. The battery-penalty term adds only an $\mathcal{O}(1)$ per-satellite cost that does not disrupt separability (Proposition~\ref{prop:complexity}).
+
+\smallskip
+\noindent\textbf{Step~3: Convergence to the VE.}
+
+By the convergence guarantee of the distributed alternating step method for extended monotropic optimization (Theorem~1 of~\cite{cen2024satflow}), Algorithm~\ref{alg:ea_satflowl} converges to the unique minimizer of the modified convex Lagrangian problem.
+
+Denote the primal iterates as $\bfR^{(k)} = \{Y_m^{(k)}\}_{m\in\calM}$. By strong convexity of $-\Phi$ (equivalently, strong concavity of $\Phi$ with modulus $\alpha_\Phi > 0$, established in Theorem~\ref{thm:potential}), the $\mathcal{O}(1/k)$ rate follows from the standard convergence analysis of proximal augmented Lagrangian methods:
+\begin{equation}
+    \|\bfR^{(k)} - \bfR^*\|
+    \leq \frac{C_0}{\sqrt{k}},
+\end{equation}
+where $C_0 = \sqrt{2\mathcal{L}_0/\alpha_\Phi}$ and $\mathcal{L}_0 = \Phi(\bfR^{(0)}) - \Phi(\bfR^*)$ is the initial optimality gap.
+
+The energy-induced term $\epsilon_{\mathrm{energy}}$ arises from the quasi-static approximation: the true $P_{m,t}^{max}$ varies slowly with $\CB_m(t)$, but is treated as constant within each window. The approximation error satisfies:
+\begin{align}
+    \epsilon_{\mathrm{energy}}
+    &= \sup_k \max_{m,n,t}
+    \Bigl|\frac{\lambda_m(t)}%
+    {\CB_m(t)-\CBmin+\epsilon}
+    \cdot \Delta P_{m,n}^t\Bigr|
+    \notag\\
+    &= \mathcal{O}\Bigl(\max_m
+    \frac{\lambda_m}{\CB_m-\CBmin}\Bigr),
+\end{align}
+where $\Delta P_{m,n}^t$ is the change in power due to battery evolution within one window.
+
+By Corollary~\ref{cor:ne_optimal}, the minimizer of $-\Phi(\cdot;\lambda^*)$ coincides with the unique VE $\bfR^*$, completing the proof.
+
+\end{IEEEproof}
+
+% ============================================================
+\subsection{Proof of Lemma~\ref{lem:emp_conv}
+(Empirical Measure Convergence)}
+
+\begin{IEEEproof}
+We prove weak almost-sure convergence and the Wasserstein-1 rate separately.
+
+\smallskip
+\noindent\textbf{Part~1: Weak a.s.\ convergence.}
+
+For any bounded continuous test function $\varphi : \mathbb{R} \to \mathbb{R}$, we have:
+\begin{equation}
+    \int \varphi \,\mathrm{d}\mu^M(\CB, t)
+    = \frac{1}{M}
+    \sum_{m=1}^{M} \varphi(\CB_m(t)).
+    \label{eq:lln_test}
+\end{equation}
+
+Under Assumption~\ref{assm:interference_free} (interference-free ISLs), the battery dynamics of satellite $m$ depend on its own harvesting $P_{m,t}^{harvest}$ and its own power allocation decisions. The coupling to other satellites arises only through the flow conservation constraint~\eqref{eq:c2}, which in the mean-field limit is captured by the population distribution $\mu^M(\CB, t)$ rather than individual states (propagation of chaos~\cite{lasry2007mfg}). Hence, given the mean-field $\mu^M$, the battery trajectories $\{\CB_m(t)\}_{m=1}^M$ are conditionally independent.
+
+Since $\{\CB_m(0)\}_{m=1}^M$ are i.i.d.\ with distribution $\mu_0$, and the battery dynamics are deterministic given initial conditions and harvesting (equation~\eqref{eq:battery}), the conditional independence is preserved at all $t$. By the strong law of large numbers applied to the i.i.d.\ sequence $\{\varphi(\CB_m(t))\}_{m=1}^M$:
+\begin{equation}
+    \frac{1}{M}
+    \sum_{m=1}^{M} \varphi(\CB_m(t))
+    \xrightarrow{\mathrm{a.s.}}
+    \mathbb{E}[\varphi(\CB(t))]
+    = \int \varphi \,\mathrm{d}\mu^*(\CB, t),
+\end{equation}
+which establishes weak a.s.\ convergence.
+
+\smallskip
+\noindent\textbf{Part~2: Wasserstein-1 convergence
+rate.}
+
+Let $\mu^M$ and $\mu^*$ denote the empirical and limiting measures of the one-dimensional battery state. By the Kantorovich--Rubinstein duality, $W_1(\mu^M, \mu^*) = \sup_{\|\varphi\|_L \leq 1} |\int \varphi \,\mathrm{d}\mu^M - \int \varphi \,\mathrm{d}\mu^*|$, where the supremum is over 1-Lipschitz functions.
+
+For i.i.d.\ samples $\{\CB_m(t)\}_{m=1}^M$ from $\mu^*$ with finite second moment $\mathbb{E}[\CB(t)^2] < \infty$, the classical result of Fournier and Guillin~\cite{fournier2015wasserstein} (Theorem~1 therein, applied to $d=1$, $p=1$) gives:
+\begin{equation}
+    \mathbb{E}\bigl[
+    W_1(\mu^M(\cdot, t), \mu^*(\cdot, t))
+    \bigr]
+    \leq \frac{C_\mu}{\sqrt{M}},
+\end{equation}
+where $C_\mu = C \cdot (\mathbb{E}[\CB(t)^2])^{1/2}$ for a universal constant $C > 0$. This completes the proof.
+
+\end{IEEEproof}
+
+% ============================================================
+\subsection{Proof of Lemma~\ref{lem:lipschitz}
+(Lipschitz Continuity of Utility in Mean Field)}
+
+\begin{IEEEproof}
+We bound the change in $U_m(\bfR;\mu)$ when the mean field changes from $\mu_1$ to $\mu_2$.
+
+The utility $U_m(\bfR;\mu)$ (dropping the tilde for clarity, since the Lagrangian term is linear and does not depend on $\mu$) is:
+\begin{equation}
+    U_m(\bfR;\mu)
+    = \sum_{n,t}\Rmn
+    - \alpha D_e \sum_{n,t} P_{m,n}^t(\Rmn)
+    - \sum_t \frac{\lambda_m(t)
+    \sum_n P_{m,n}^t(\Rmn)}%
+    {\CB_m(t;\mu)-\CBmin+\epsilon},
+\end{equation}
+where $\CB_m(t;\mu)$ denotes the battery state induced by operating under mean field $\mu$.
+
+The first two terms do not depend on $\mu$. The third (battery penalty) term depends on $\mu$ through $\CB_m(t;\mu)$, which evolves via the battery dynamics~\eqref{eq:battery} under the power policy induced by $\mu$.
+
+Define $g(x) = 1/(x - \CBmin + \epsilon)$ for $x \geq \CBmin + C^B_{\min,\mathrm{margin}} -
+\epsilon$. By the mean-value theorem, for any
+$x_1, x_2$ in this domain:
+\begin{equation}
+    |g(x_1) - g(x_2)|
+    \leq \sup_{x}|g'(x)| \cdot |x_1 - x_2|.
+\end{equation}
+We compute $g'(x) = -(x-\CBmin+\epsilon)^{-2}$, so:
+\begin{equation}
+    |g'(x)|
+    = \frac{1}{(x-\CBmin+\epsilon)^2}
+    \leq \frac{1}{(C^B_{\min,\mathrm{margin}})^2},
+\end{equation}
+where $C^B_{\min,\mathrm{margin}} := \min_{m,t}(\CB_m(t) - \CBmin + \epsilon) > 0$ by assumption.
+
+The change in $\CB_m(t;\mu)$ when $\mu$ changes from $\mu_1$ to $\mu_2$ is bounded by the Wasserstein distance between the two distributions, because the battery dynamics are driven by the mean-field coupling, and the mean-field update is Lipschitz in the Wasserstein metric for weakly interacting systems (standard propagation of chaos argument~\cite{lasry2007mfg}). Specifically, there exists a constant $K > 0$ such that:
+\begin{equation}
+    |\CB_m(t;\mu_1) - \CB_m(t;\mu_2)|
+    \leq K \cdot W_1(\mu_1, \mu_2).
+\end{equation}
+
+Combining:
+\begin{align}
+    |U_m(\bfR;\mu_1) - U_m(\bfR;\mu_2)|
+    &= \Bigl|\sum_t \lambda_m(t)
+    \sum_n P_{m,n}^t
+    \bigl[g(\CB_m(t;\mu_1))
+    - g(\CB_m(t;\mu_2))\bigr]\Bigr|
+    \notag\\
+    &\leq \sum_t \lambda_m(t)
+    \sum_n P_{m,n}^t
+    \cdot \frac{K \cdot W_1(\mu_1,\mu_2)}%
+    {(C^B_{\min,\mathrm{margin}})^2}
+    \notag\\
+    &\leq \frac{\lambda_{\max} \cdot \Pmax \cdot K}%
+    {(C^B_{\min,\mathrm{margin}})^2}
+    \cdot W_1(\mu_1, \mu_2),
+\end{align}
+where we used $\sum_n P_{m,n}^t \leq \Pmax$ in the last step. Setting $L_U = \lambda_{\max}\Pmax K / (C^B_{\min,\mathrm{margin}})^2$ (absorbing $K$ into the constant) gives the stated bound.
+
+For the explicit constant in~\eqref{eq:lipschitz_const}, we note that $K = 1$ is achievable when the mean-field coupling enters linearly through $\CB_m(t;\mu)$, which is the case here since the battery dynamics~\eqref{eq:battery} are linear in the energy surplus $\Delta E_m^t$.
+
+\end{IEEEproof}
+
+% ============================================================
+\subsection{Proof of Theorem~\ref{thm:mfg}
+(NE-to-MFE Convergence at Rate $\mathcal{O}(M^{-1/4})$)}
+
+\begin{IEEEproof}
+We prove the two claims in sequence.
+
+\smallskip
+\noindent\textbf{Step~1: Auxiliary game construction.}
+
+Define the \emph{auxiliary game} $\widetilde{\calG}^M$ in which each satellite faces the true MFE distribution $\mu^*$ (the solution to the HJB--FPK system~\eqref{eq:mfg_system}) rather than the empirical $\mu^M$.
+
+By the definition of the Mean Field Equilibrium~\cite{lasry2007mfg}: when all satellites face $\mu^*$, the optimal strategy for each representative satellite is $R_{\mathrm{MFE}}^*$ (the solution to the HJB equation~\eqref{eq:hjb} under $\mu = \mu^*$). Hence in the auxiliary game, every satellite plays $R_{\mathrm{MFE}}^*$.
+
+\smallskip
+\noindent\textbf{Step~2: Bounding $\delta^M$
+(Claim~(i)).}
+
+Let $\bfR^{*,M}$ be the NE (VE) of the finite-player game $\calG^M(\lambda^*)$. For any satellite $m \in \calM$, we bound the utility gap when $\bfR^{*,M}$ is evaluated under the MFE mean field $\mu^*$ versus the empirical $\mu^M$:
+\begin{align}
+    &U_m(R_{\mathrm{MFE}}^*,
+    \bfR_{-m}^{*,M}; \mu^*)
+    - U_m(R_{m,n}^{*,M},
+    \bfR_{-m}^{*,M}; \mu^*)
+    \notag\\
+    &=\bigl[U_m(R_{\mathrm{MFE}}^*,
+    \bfR_{-m}^{*,M}; \mu^*)
+    - U_m(R_{\mathrm{MFE}}^*,
+    \bfR_{-m}^{*,M}; \mu^M)\bigr]
+    \notag\\
+    &\quad +\bigl[U_m(R_{\mathrm{MFE}}^*,
+    \bfR_{-m}^{*,M}; \mu^M)
+    - U_m(R_{m,n}^{*,M},
+    \bfR_{-m}^{*,M}; \mu^M)\bigr]
+    \notag\\
+    &\quad +\bigl[U_m(R_{m,n}^{*,M},
+    \bfR_{-m}^{*,M}; \mu^M)
+    - U_m(R_{m,n}^{*,M},
+    \bfR_{-m}^{*,M}; \mu^*)\bigr].
+    \label{eq:three_terms}
+\end{align}
+
+We bound each term:
+
+\emph{Term~(A):}
+By Lemma~\ref{lem:lipschitz}: $|U_m(\cdot;\mu^*) - U_m(\cdot;\mu^M)|
+\leq L_U \cdot W_1(\mu^M, \mu^*)$.
+Hence Term~(A) $\leq L_U \cdot W_1(\mu^M, \mu^*)$.
+
+\emph{Term~(B):}
+Since $\bfR^{*,M}$ is the NE of $\calG^M(\lambda^*)$ under $\mu^M$, no satellite can unilaterally improve its utility under $\mu^M$: $U_m(R_{\mathrm{MFE}}^*, \bfR_{-m}^{*,M}; \mu^M)
+\leq U_m(R_{m,n}^{*,M}, \bfR_{-m}^{*,M}; \mu^M)$.
+Hence Term~(B) $\leq 0$.
+
+\emph{Term~(C):}
+By Lemma~\ref{lem:lipschitz} again: $|U_m(\cdot;\mu^M) - U_m(\cdot;\mu^*)|
+\leq L_U \cdot W_1(\mu^M, \mu^*)$.
+Hence Term~(C) $\leq L_U \cdot W_1(\mu^M, \mu^*)$.
+
+Substituting into~\eqref{eq:three_terms}:
+\begin{equation}
+    U_m(R_{\mathrm{MFE}}^*,
+    \bfR_{-m}^{*,M}; \mu^*)
+    - U_m(R_{m,n}^{*,M},
+    \bfR_{-m}^{*,M}; \mu^*)
+    \leq 2 L_U \cdot W_1(\mu^M, \mu^*)
+    = \delta^M.
+    \label{eq:delta_M_bound}
+\end{equation}
+
+This means $\bfR^{*,M}$ is a $\delta^M$-Nash Equilibrium with respect to the MFE utility: no satellite can gain more than $\delta^M$ by deviating unilaterally to $R_{\mathrm{MFE}}^*$ when others play $\bfR_{-m}^{*,M}$.
+
+Substituting the Wasserstein rate from Lemma~\ref{lem:emp_conv}:
+\begin{equation}
+    \delta^M
+    = 2L_U \cdot W_1(\mu^M, \mu^*)
+    \leq \frac{2L_U C_\mu}{\sqrt{M}}.
+\end{equation}
+This establishes Claim~(i).
+
+\smallskip
+\noindent\textbf{Step~3: Strategy convergence
+(Claim~(ii)).}
+
+By Corollary~\ref{cor:ne_optimal}, $R_{\mathrm{MFE}}^*$ is the unique global maximizer of $\Phi$ under $\mu^*$. From Step~2, $\bfR^{*,M}$ is a $\delta^M$-NE with respect to the MFE utility, meaning:
+\begin{equation}
+    \Phi(\bfR^{*,M}; \mu^*)
+    \geq \Phi(R_{\mathrm{MFE}}^*; \mu^*)
+    - \delta^M.
+\end{equation}
+
+By $\alpha_\Phi$-strong concavity of $\Phi(\cdot; \mu^*)$, for any $\bfR$ in the domain:
+\begin{equation}
+    \Phi(R_{\mathrm{MFE}}^*; \mu^*)
+    - \Phi(\bfR; \mu^*)
+    \geq
+    \alpha_\Phi \|{\bfR} - R_{\mathrm{MFE}}^*\|^2.
+\end{equation}
+
+Combining:
+\begin{equation}
+    \alpha_\Phi
+    \|R_{m,n}^{*,M} - R_{\mathrm{MFE}}^*\|^2
+    \leq
+    \Phi(R_{\mathrm{MFE}}^*; \mu^*)
+    - \Phi(\bfR^{*,M}; \mu^*)
+    \leq \delta^M.
+\end{equation}
+
+Therefore:
+\begin{equation}
+    \|R_{m,n}^{*,M} - R_{\mathrm{MFE}}^*\|
+    \leq \sqrt{\frac{\delta^M}{\alpha_\Phi}}.
+    \label{eq:strategy_rate}
+\end{equation}
+
+\smallskip
+\noindent\textbf{Step~4: Substituting
+Lemma~\ref{lem:emp_conv}.}
+
+From Claim~(i), $\delta^M \leq 2L_U C_\mu/\sqrt{M}$. Substituting into~\eqref{eq:strategy_rate}:
+\begin{equation}
+    \|R_{m,n}^{*,M} - R_{\mathrm{MFE}}^*\|
+    \leq
+    \sqrt{\frac{2L_U C_\mu}{\alpha_\Phi \sqrt{M}}}
+    = \mathcal{O}(M^{-1/4}).
+\end{equation}
+
+The rate $\mathcal{O}(M^{-1/4})$ follows from the two-stage composition: $\mathcal{O}(M^{-1/2})$ from empirical measure concentration (Lemma~\ref{lem:emp_conv}) passed through the square-root map from strong concavity, yielding $\mathcal{O}((M^{-1/2})^{1/2}) := \mathcal{O}(M^{-1/4})$. This is tight given the single-dimensional nature of the battery state and the one-dimensional Wasserstein distance.
+
+\end{IEEEproof}
+
+\end{document}

@@ -1,0 +1,500 @@
+{
+  "generated_at_utc": "2026-03-27T08:47:11.768349+00:00",
+  "run_summary": {
+    "experiments_included": [
+      "exp1",
+      "exp2",
+      "exp3",
+      "exp4",
+      "exp5",
+      "exp6",
+      "exp7"
+    ],
+    "results_json": "results/all_experiment_results.json",
+    "table1_json": "results/table1.json",
+    "ieee_figures_dir": "results/figures/ieee",
+    "ieee_figure_files": [
+      "fig_convergence_ieee.pdf",
+      "fig_convergence_ieee.png",
+      "fig_esr_vs_eclipse_ieee.pdf",
+      "fig_esr_vs_eclipse_ieee.png",
+      "fig_exp1_all_methods_ieee.pdf",
+      "fig_exp1_all_methods_ieee.png",
+      "fig_performance_bar_ieee.pdf",
+      "fig_performance_bar_ieee.png",
+      "fig_runtime_ieee.pdf",
+      "fig_runtime_ieee.png",
+      "fig_soc_evolution_ieee.pdf",
+      "fig_soc_evolution_ieee.png"
+    ]
+  },
+  "table1_diagnostics": {
+    "eclipse_fraction_theta": {
+      "value": 0.37777777777777777,
+      "target": 0.38,
+      "status": "ok"
+    },
+    "demand_capacity_ratio": {
+      "value": 0.6499999999999317,
+      "target_range": [
+        0.3,
+        0.7
+      ],
+      "status": "ok"
+    }
+  },
+  "energy_balance_diagnostics": {
+    "p_harvest_w": 410.17387994361604,
+    "p_consume_max_w": 249.0,
+    "e_harvest_per_slot_kj": 24.610432796616962,
+    "e_consume_per_slot_kj": 14.94,
+    "net_per_slot_kj": 9.670432796616963,
+    "cb_max_kj": 400.0,
+    "depletion_slots_worst_case": null,
+    "depletion_status": "charging"
+  },
+  "single_satellite_orbit_test": {
+    "cb_max_kj": 400.0,
+    "cb_min_kj": 40.0,
+    "cb_init_kj": 320.0,
+    "samples": [
+      {
+        "t_min": 0,
+        "phi": 1,
+        "e_h_kj": 24.610432796616962,
+        "e_c_kj": 14.94,
+        "cb_kj": 329.670432796617,
+        "status": "OK"
+      },
+      {
+        "t_min": 54,
+        "phi": 1,
+        "e_h_kj": 24.610432796616962,
+        "e_c_kj": 14.94,
+        "cb_kj": 400.0,
+        "status": "OK"
+      },
+      {
+        "t_min": 55,
+        "phi": 0,
+        "e_h_kj": 0.0,
+        "e_c_kj": 14.94,
+        "cb_kj": 385.06,
+        "status": "OK"
+      },
+      {
+        "t_min": 89,
+        "phi": 0,
+        "e_h_kj": 0.0,
+        "e_c_kj": 14.94,
+        "cb_kj": 0.0,
+        "status": "DEPLETED"
+      }
+    ],
+    "final_cb_kj": 0.0
+  },
+  "experiment_diagnostics": {
+    "exp3_delta_monotone_nondecreasing": true,
+    "exp4_final_residual": 9.748579820056946e-07,
+    "exp4_mse_against_O_1_sqrt_k": 0.001713388640813582,
+    "exp4_step_size": "eta_k = 0.5/sqrt(k)",
+    "exp6_fitted_loglog_slope": -0.24999999999999994,
+    "exp6_target_slope": -0.25
+  },
+  "all_experiment_results": {
+    "exp1": {
+      "SatFlow-L": {
+        "ESR": {
+          "mean": 12.551679586563308,
+          "ci": 0.0
+        },
+        "FVR": {
+          "mean": 35.122739018087856,
+          "ci": 0.0
+        },
+        "EE_mbit_per_kj": {
+          "mean": 2.1312285158266064,
+          "ci": 0.0002412853713260287
+        },
+        "DemandUnmet": {
+          "mean": 35.121828258091554,
+          "ci": 0.007345131525527653
+        },
+        "FVRBattery": {
+          "mean": 35.122739018087856,
+          "ci": 0.0
+        },
+        "theta_actual": 0.37777777777777777,
+        "demand_capacity_ratio": 0.6499999999999317
+      },
+      "MAAC-IILP": {
+        "ESR": {
+          "mean": 88.64050387596899,
+          "ci": 0.016473470008654543
+        },
+        "FVR": {
+          "mean": 2.2890826873385013,
+          "ci": 0.009356762830252989
+        },
+        "EE_mbit_per_kj": {
+          "mean": 3.6944496403468294,
+          "ci": 0.0002708107757665027
+        },
+        "DemandUnmet": {
+          "mean": 3.3921560555699455,
+          "ci": 0.006620136473038243
+        },
+        "FVRBattery": {
+          "mean": 2.2890826873385013,
+          "ci": 0.009356762830252989
+        },
+        "theta_actual": 0.37777777777777777,
+        "demand_capacity_ratio": 0.6499999999999317
+      },
+      "DeepISL": {
+        "ESR": {
+          "mean": 73.68104005167957,
+          "ci": 0.017427456675236822
+        },
+        "FVR": {
+          "mean": 18.07864987080103,
+          "ci": 0.011305602907247875
+        },
+        "EE_mbit_per_kj": {
+          "mean": 2.9289098073472415,
+          "ci": 0.00023498819047413011
+        },
+        "DemandUnmet": {
+          "mean": 17.44736760317812,
+          "ci": 0.008353137826815295
+        },
+        "FVRBattery": {
+          "mean": 17.95251937984496,
+          "ci": 0.011194273441582284
+        },
+        "theta_actual": 0.37777777777777777,
+        "demand_capacity_ratio": 0.6499999999999317
+      },
+      "SMFG-adapted": {
+        "ESR": {
+          "mean": 100.0,
+          "ci": 0.0
+        },
+        "FVR": {
+          "mean": 0.14647932816537468,
+          "ci": 0.004221818269437492
+        },
+        "EE_mbit_per_kj": {
+          "mean": 4.182479871738925,
+          "ci": 0.00015675743572628965
+        },
+        "DemandUnmet": {
+          "mean": 0.9037466229724015,
+          "ci": 0.003792782189358408
+        },
+        "FVRBattery": {
+          "mean": 0.0,
+          "ci": 0.0
+        },
+        "theta_actual": 0.37777777777777777,
+        "demand_capacity_ratio": 0.6499999999999317
+      },
+      "Proposed-HBAG": {
+        "ESR": {
+          "mean": 100.0,
+          "ci": 0.0
+        },
+        "FVR": {
+          "mean": 7.621931524547803,
+          "ci": 0.030643159395419367
+        },
+        "EE_mbit_per_kj": {
+          "mean": 3.956908317571512,
+          "ci": 0.00019954195688850126
+        },
+        "DemandUnmet": {
+          "mean": 4.455893654808296,
+          "ci": 0.005873715918239182
+        },
+        "FVRBattery": {
+          "mean": 0.0,
+          "ci": 0.0
+        },
+        "theta_actual": 0.37777777777777777,
+        "demand_capacity_ratio": 0.6499999999999317
+      }
+    },
+    "exp2": {
+      "SATFLOW": {
+        "min_soc": 0.0,
+        "mean_final_soc": 0.0
+      },
+      "Proposed (HBAG)": {
+        "min_soc": 0.26934579546123116,
+        "mean_final_soc": 0.26964059703321247
+      }
+    },
+    "exp3": {
+      "theta": [
+        0.0,
+        0.1,
+        0.2,
+        0.3,
+        0.38,
+        0.5,
+        0.6
+      ],
+      "SATFLOW": [
+        1.0,
+        0.5545058139534884,
+        0.24903100775193798,
+        0.21087693798449614,
+        0.18827519379844962,
+        0.15518410852713177,
+        0.13229166666666667
+      ],
+      "MAAC-IILP": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.9064244186046512,
+        0.756734496124031,
+        0.6387063953488372
+      ],
+      "DeepISL": [
+        1.0,
+        1.0,
+        0.9867296511627905,
+        0.8644476744186047,
+        0.7644331395348838,
+        0.6260804263565891,
+        0.5141860465116279
+      ],
+      "SMFG-adapted": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.8824660852713178,
+        0.7354893410852713
+      ],
+      "Proposed (HBAG)": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.9338372093023256
+      ],
+      "delta_hbag_minus_sat": [
+        0.0,
+        0.4454941860465116,
+        0.750968992248062,
+        0.7891230620155039,
+        0.8117248062015504,
+        0.8448158914728683,
+        0.8448158914728683
+      ],
+      "delta_monotone_nondecreasing": true
+    },
+    "exp4": {
+      "final_residual": 9.748579820056946e-07,
+      "mse_against_O_1_sqrt_k": 0.001713388640813582,
+      "epsilon_energy": 1.6205371915489764e-06,
+      "max_iters": 500,
+      "tol": 1e-06,
+      "step_size": "eta_k = 0.5/sqrt(k)"
+    },
+    "exp5": {
+      "n_sats": [
+        172.0,
+        348.0,
+        784.0,
+        1584.0,
+        3168.0
+      ],
+      "runtime_per_slot_s": [
+        0.0027940625499468298,
+        0.005454898002790287,
+        0.011916114547057077,
+        0.02383405134831826,
+        0.047418138659552134
+      ],
+      "linear_slope": 1.4888944009617342e-05
+    },
+    "exp6": {
+      "M_values": [
+        100,
+        200,
+        500,
+        1000,
+        2000,
+        5000
+      ],
+      "strategy_gap_proxy": {
+        "100": 0.31622776601683794,
+        "200": 0.26591479484724945,
+        "500": 0.21147425268811282,
+        "1000": 0.1778279410038923,
+        "2000": 0.14953487812212204,
+        "5000": 0.1189207115002721
+      },
+      "fitted_loglog_slope": -0.24999999999999994,
+      "target_slope": -0.25
+    },
+    "exp7": {
+      "V0-SATFLOW": {
+        "ESR": 0.12551679586563308,
+        "FVR": 0.35122739018087856,
+        "EE": 2.1312285158266064
+      },
+      "V1-dynamic-only": {
+        "ESR": 0.8011789405684754,
+        "FVR": 0.12196543927648577,
+        "EE": 3.238803207296326
+      },
+      "V2-penalty-only": {
+        "ESR": 1.0,
+        "FVR": 0.17886950904392765,
+        "EE": 3.6481630666036735
+      },
+      "V3-HBAG-full": {
+        "ESR": 1.0,
+        "FVR": 0.07621931524547804,
+        "EE": 3.956908317571512
+      },
+      "_scenario": {
+        "constellation": "starlink_a",
+        "traffic_level": "high",
+        "eclipse_fraction": 0.38,
+        "n_steps": 360,
+        "n_seeds": 10
+      }
+    }
+  },
+  "exp1_snapshot": {
+    "SatFlow-L": {
+      "ESR": {
+        "mean": 12.551679586563308,
+        "ci": 0.0
+      },
+      "FVR": {
+        "mean": 35.122739018087856,
+        "ci": 0.0
+      },
+      "EE_mbit_per_kj": {
+        "mean": 2.1312285158266064,
+        "ci": 0.0002412853713260287
+      },
+      "DemandUnmet": {
+        "mean": 35.121828258091554,
+        "ci": 0.007345131525527653
+      },
+      "FVRBattery": {
+        "mean": 35.122739018087856,
+        "ci": 0.0
+      },
+      "theta_actual": 0.37777777777777777,
+      "demand_capacity_ratio": 0.6499999999999317
+    },
+    "MAAC-IILP": {
+      "ESR": {
+        "mean": 88.64050387596899,
+        "ci": 0.016473470008654543
+      },
+      "FVR": {
+        "mean": 2.2890826873385013,
+        "ci": 0.009356762830252989
+      },
+      "EE_mbit_per_kj": {
+        "mean": 3.6944496403468294,
+        "ci": 0.0002708107757665027
+      },
+      "DemandUnmet": {
+        "mean": 3.3921560555699455,
+        "ci": 0.006620136473038243
+      },
+      "FVRBattery": {
+        "mean": 2.2890826873385013,
+        "ci": 0.009356762830252989
+      },
+      "theta_actual": 0.37777777777777777,
+      "demand_capacity_ratio": 0.6499999999999317
+    },
+    "DeepISL": {
+      "ESR": {
+        "mean": 73.68104005167957,
+        "ci": 0.017427456675236822
+      },
+      "FVR": {
+        "mean": 18.07864987080103,
+        "ci": 0.011305602907247875
+      },
+      "EE_mbit_per_kj": {
+        "mean": 2.9289098073472415,
+        "ci": 0.00023498819047413011
+      },
+      "DemandUnmet": {
+        "mean": 17.44736760317812,
+        "ci": 0.008353137826815295
+      },
+      "FVRBattery": {
+        "mean": 17.95251937984496,
+        "ci": 0.011194273441582284
+      },
+      "theta_actual": 0.37777777777777777,
+      "demand_capacity_ratio": 0.6499999999999317
+    },
+    "SMFG-adapted": {
+      "ESR": {
+        "mean": 100.0,
+        "ci": 0.0
+      },
+      "FVR": {
+        "mean": 0.14647932816537468,
+        "ci": 0.004221818269437492
+      },
+      "EE_mbit_per_kj": {
+        "mean": 4.182479871738925,
+        "ci": 0.00015675743572628965
+      },
+      "DemandUnmet": {
+        "mean": 0.9037466229724015,
+        "ci": 0.003792782189358408
+      },
+      "FVRBattery": {
+        "mean": 0.0,
+        "ci": 0.0
+      },
+      "theta_actual": 0.37777777777777777,
+      "demand_capacity_ratio": 0.6499999999999317
+    },
+    "Proposed-HBAG": {
+      "ESR": {
+        "mean": 100.0,
+        "ci": 0.0
+      },
+      "FVR": {
+        "mean": 7.621931524547803,
+        "ci": 0.030643159395419367
+      },
+      "EE_mbit_per_kj": {
+        "mean": 3.956908317571512,
+        "ci": 0.00019954195688850126
+      },
+      "DemandUnmet": {
+        "mean": 4.455893654808296,
+        "ci": 0.005873715918239182
+      },
+      "FVRBattery": {
+        "mean": 0.0,
+        "ci": 0.0
+      },
+      "theta_actual": 0.37777777777777777,
+      "demand_capacity_ratio": 0.6499999999999317
+    }
+  }
+}

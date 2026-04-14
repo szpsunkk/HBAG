@@ -1,0 +1,147 @@
+{
+  "timestamp": "2026-03-27 07:44:27",
+  "code_status": {
+    "required_files": 22,
+    "missing_files": 0,
+    "missing_list": [],
+    "complete": true
+  },
+  "experiment_results": {
+    "table1": {
+      "SatFlow-L": {
+        "ESR": {
+          "mean": 2.5,
+          "ci": 0.0
+        },
+        "FVR": {
+          "mean": 100.0,
+          "ci": 0.0
+        },
+        "EE_mbit_per_kj": {
+          "mean": 4.807577802516543,
+          "ci": 0.005219221139256737
+        }
+      },
+      "MAAC-IILP": {
+        "ESR": {
+          "mean": 4.844476744186046,
+          "ci": 0.021255202228573026
+        },
+        "FVR": {
+          "mean": 2.633720930232558,
+          "ci": 0.02745677451338165
+        },
+        "EE_mbit_per_kj": {
+          "mean": 6.941311275183649,
+          "ci": 0.0006601906560732046
+        }
+      },
+      "DeepISL": {
+        "ESR": {
+          "mean": 7.499999999999998,
+          "ci": 9.066821367772111e-16
+        },
+        "FVR": {
+          "mean": 73.92441860465117,
+          "ci": 0.2933057423885835
+        },
+        "EE_mbit_per_kj": {
+          "mean": 6.141872744078563,
+          "ci": 0.0013523685509425959
+        }
+      },
+      "SMFG-adapted": {
+        "ESR": {
+          "mean": 8.042151162790697,
+          "ci": 0.017535718610820646
+        },
+        "FVR": {
+          "mean": 0.0,
+          "ci": 0.0
+        },
+        "EE_mbit_per_kj": {
+          "mean": 7.001354393053307,
+          "ci": 7.908085900045602e-06
+        }
+      },
+      "Proposed-PG": {
+        "ESR": {
+          "mean": 18.273255813953487,
+          "ci": 0.04347524294346633
+        },
+        "FVR": {
+          "mean": 0.0,
+          "ci": 0.0
+        },
+        "EE_mbit_per_kj": {
+          "mean": 4.078700153818142,
+          "ci": 0.0018802432161918246
+        }
+      },
+      "Proposed-MFG": {
+        "ESR": {
+          "mean": 28.4360465116279,
+          "ci": 0.05341517010936633
+        },
+        "FVR": {
+          "mean": 0.0,
+          "ci": 0.0
+        },
+        "EE_mbit_per_kj": {
+          "mean": 4.087342800696196,
+          "ci": 0.0017192717247973344
+        }
+      }
+    }
+  },
+  "issues": [
+    {
+      "method": "SatFlow-L",
+      "issue": "ESR偏低 (严重)",
+      "issue_level": "严重",
+      "diff": 68.8,
+      "actual": 2.5,
+      "target": 71.3
+    },
+    {
+      "method": "Proposed-PG",
+      "issue": "ESR偏低 (严重)",
+      "issue_level": "严重",
+      "diff": 73.32674418604651,
+      "actual": 18.273255813953487,
+      "target": 91.6
+    },
+    {
+      "method": "Proposed-MFG",
+      "issue": "ESR偏低 (严重)",
+      "issue_level": "严重",
+      "diff": 64.7639534883721,
+      "actual": 28.4360465116279,
+      "target": 93.2
+    }
+  ],
+  "recommendations": [
+    "需要大幅调整能量模型参数：降低太阳能收集效率或增大通信功耗"
+  ],
+  "summary": {
+    "pg_distinct": true,
+    "pg_improvement": 15.773255813953487
+  },
+  "figure_status": {
+    "figures_exists": true,
+    "ieee_figures_exists": true,
+    "ieee_file_count": 10,
+    "ieee_files": [
+      "fig_soc_evolution_ieee.pdf",
+      "fig_soc_evolution_ieee.png",
+      "fig_runtime_ieee.png",
+      "fig_convergence_ieee.png",
+      "fig_convergence_ieee.pdf",
+      "fig_runtime_ieee.pdf",
+      "fig_performance_bar_ieee.pdf",
+      "fig_performance_bar_ieee.png",
+      "fig_esr_vs_eclipse_ieee.pdf",
+      "fig_esr_vs_eclipse_ieee.png"
+    ]
+  }
+}
