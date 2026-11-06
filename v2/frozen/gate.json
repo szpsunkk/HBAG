@@ -1,0 +1,19 @@
+{
+  "state": "PASS",
+  "plan_version": "v2.3",
+  "source_fingerprint": "39a8e8dfc58e12af828ddd70837ee8066bb5413863fdce15ce1040f113e7ed66",
+  "time": "2026-11-02T13:14:20.073980+09:00",
+  "load": 0.65,
+  "flows": 288,
+  "capacity_by_rho": {
+    "0.6": 1828764.8162031497,
+    "1.0": 1097258.88972189,
+    "1.2": 914382.4081015749,
+    "1.4": 783756.3498013499,
+    "1.6": 685786.8060761812
+  },
+  "test_seeds_executed": [],
+  "reused_calibration_source": "7c0bab3c426c727fee1e0a53970c4b4e6c60a7d4ef13bc3749be7dc086704769",
+  "reuse_audit": "results_r2/audit/v23_transition.json",
+  "unchanged_bitwise_audit": "results_r2/audit/v23_unchanged_bitwise.json"
+}

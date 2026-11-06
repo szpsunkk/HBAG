@@ -1,0 +1,29 @@
+{
+  "summary_counts": {
+    "E10": 85,
+    "E13": 80,
+    "E2": 920,
+    "E4_RF": 300,
+    "E4_optical": 300,
+    "E5": 1200,
+    "E6": 300,
+    "E7": 500,
+    "E8": 640,
+    "E9_iterations": 100,
+    "MPC": 40
+  },
+  "summary_total": 4465,
+  "convergence_records": 111853,
+  "validation_runs": 4,
+  "source_versions": {
+    "optical": "v2.3 (unchanged by v2.4)",
+    "RF_and_short_slot_delay": "v2.4",
+    "paired_statistics": "v2.3.1"
+  },
+  "metadata_note": "Per-run numerical fields and configs are preserved. Host-specific manifest objects are omitted; source paths and hashes identify the original records.",
+  "superseded_tables": [
+    "reference/tables/E4_summary.csv",
+    "reference/tables/E8_summary.csv",
+    "reference/tables/v231/E11_RF_grid.csv"
+  ]
+}

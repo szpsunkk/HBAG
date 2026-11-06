@@ -1,0 +1,13 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+*.egg-info/
+v2/outputs/
+v2/.mpl/
+v2/hbag3/archive*/
+v2/results_r2/**
+!v2/results_r2/audit/
+!v2/results_r2/audit/**/
+!v2/results_r2/audit/**/*.npz

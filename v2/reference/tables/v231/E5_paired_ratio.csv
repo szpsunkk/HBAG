@@ -1,0 +1,11 @@
+cell,metric,total_seeds,zero_denominator_seeds,negative_denominator_seeds,minimum_absolute_nonzero_denominator_bits,estimand,n,mean,ci95_low,ci95_high
+load_0.5_eclipse,(HBAG-V1)/(V0-V1),20,0,0,528455314381151.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.24082987947365045,0.21947192938915364,0.26319799394581256
+load_0.5_hotspot5,(HBAG-V1)/(V0-V1),20,0,0,218969645684644.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.5565483651153673,0.5264997326693096,0.5877337324063501
+load_0.5_mmpp,(HBAG-V1)/(V0-V1),20,0,0,242591651129973.75,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.40917149776898426,0.38179751887919494,0.4379644261282218
+load_0.65_steady,(HBAG-V1)/(V0-V1),20,0,0,322478117491419.5,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.4443042378631493,0.416020487487188,0.4746209255130438
+load_0.8_eclipse,(HBAG-V1)/(V0-V1),20,0,0,880950841352402.5,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.13338379890460061,0.11717335200013687,0.14934053230053368
+load_0.8_hotspot5,(HBAG-V1)/(V0-V1),20,0,0,377297721540507.5,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.38522984255516024,0.3616256743049495,0.40984280764845266
+load_0.8_mmpp,(HBAG-V1)/(V0-V1),20,0,0,431045773571494.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.2677494007719169,0.24747085191759952,0.2880475139797151
+load_1.1_eclipse,(HBAG-V1)/(V0-V1),20,0,0,1150288186740737.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.08549049567438306,0.07295686909702556,0.09800504558413044
+load_1.1_hotspot5,(HBAG-V1)/(V0-V1),20,0,0,558097121928547.5,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.2856247007619443,0.2670919311939002,0.3042880657275625
+load_1.1_mmpp,(HBAG-V1)/(V0-V1),20,0,0,606615550587269.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.20004435478277985,0.18377218189248307,0.2165599037649741

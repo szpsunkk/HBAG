@@ -1,0 +1,359 @@
+{
+  "time": "2026-11-04T12:49:18.932674+09:00",
+  "plan_version": "v2.3.1",
+  "plan_sha256": "bb587e937ad1c0e010589f328adb69deae2926fab3becf4b0ca7f03611c8feba",
+  "source_fingerprint": "e376b2bf5b74f8686f6d9ef6cbbc955290feb92adab0744bdd2bc0f4037c29a9",
+  "grid": [
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.03,
+        "dual_warm": "zero",
+        "kappa_off": 0.5
+      },
+      "label": "HBAG_00"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.03,
+        "dual_warm": "zero",
+        "kappa_off": 1.0
+      },
+      "label": "HBAG_01"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.03,
+        "dual_warm": "zero",
+        "kappa_off": 2.0
+      },
+      "label": "HBAG_02"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.03,
+        "dual_warm": "prev",
+        "kappa_off": 0.5
+      },
+      "label": "HBAG_03"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.03,
+        "dual_warm": "prev",
+        "kappa_off": 1.0
+      },
+      "label": "HBAG_04"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.03,
+        "dual_warm": "prev",
+        "kappa_off": 2.0
+      },
+      "label": "HBAG_05"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.1,
+        "dual_warm": "zero",
+        "kappa_off": 0.5
+      },
+      "label": "HBAG_06"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.1,
+        "dual_warm": "zero",
+        "kappa_off": 1.0
+      },
+      "label": "HBAG_07"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.1,
+        "dual_warm": "zero",
+        "kappa_off": 2.0
+      },
+      "label": "HBAG_08"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.1,
+        "dual_warm": "prev",
+        "kappa_off": 0.5
+      },
+      "label": "HBAG_09"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.1,
+        "dual_warm": "prev",
+        "kappa_off": 1.0
+      },
+      "label": "HBAG_10"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.1,
+        "dual_warm": "prev",
+        "kappa_off": 2.0
+      },
+      "label": "HBAG_11"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.3,
+        "dual_warm": "zero",
+        "kappa_off": 0.5
+      },
+      "label": "HBAG_12"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.3,
+        "dual_warm": "zero",
+        "kappa_off": 1.0
+      },
+      "label": "HBAG_13"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.3,
+        "dual_warm": "zero",
+        "kappa_off": 2.0
+      },
+      "label": "HBAG_14"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.3,
+        "dual_warm": "prev",
+        "kappa_off": 0.5
+      },
+      "label": "HBAG_15"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.3,
+        "dual_warm": "prev",
+        "kappa_off": 1.0
+      },
+      "label": "HBAG_16"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 0.3,
+        "dual_warm": "prev",
+        "kappa_off": 2.0
+      },
+      "label": "HBAG_17"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 1.0,
+        "dual_warm": "zero",
+        "kappa_off": 0.5
+      },
+      "label": "HBAG_18"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 1.0,
+        "dual_warm": "zero",
+        "kappa_off": 1.0
+      },
+      "label": "HBAG_19"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 1.0,
+        "dual_warm": "zero",
+        "kappa_off": 2.0
+      },
+      "label": "HBAG_20"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 1.0,
+        "dual_warm": "prev",
+        "kappa_off": 0.5
+      },
+      "label": "HBAG_21"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 1.0,
+        "dual_warm": "prev",
+        "kappa_off": 1.0
+      },
+      "label": "HBAG_22"
+    },
+    {
+      "method": "HBAG",
+      "parameters": {
+        "dual_eta": 1.0,
+        "dual_warm": "prev",
+        "kappa_off": 2.0
+      },
+      "label": "HBAG_23"
+    },
+    {
+      "method": "Lyapunov",
+      "parameters": {
+        "lyapunov_lambda": 0.1,
+        "lyapunov_theta": 0.3,
+        "kappa_off": 1.0
+      },
+      "label": "Lyapunov_33"
+    },
+    {
+      "method": "Lyapunov",
+      "parameters": {
+        "lyapunov_lambda": 0.1,
+        "lyapunov_theta": 0.6,
+        "kappa_off": 1.0
+      },
+      "label": "Lyapunov_34"
+    },
+    {
+      "method": "Lyapunov",
+      "parameters": {
+        "lyapunov_lambda": 0.5,
+        "lyapunov_theta": 0.3,
+        "kappa_off": 1.0
+      },
+      "label": "Lyapunov_35"
+    },
+    {
+      "method": "Lyapunov",
+      "parameters": {
+        "lyapunov_lambda": 0.5,
+        "lyapunov_theta": 0.6,
+        "kappa_off": 1.0
+      },
+      "label": "Lyapunov_36"
+    },
+    {
+      "method": "Lyapunov",
+      "parameters": {
+        "lyapunov_lambda": 2.0,
+        "lyapunov_theta": 0.3,
+        "kappa_off": 1.0
+      },
+      "label": "Lyapunov_37"
+    },
+    {
+      "method": "Lyapunov",
+      "parameters": {
+        "lyapunov_lambda": 2.0,
+        "lyapunov_theta": 0.6,
+        "kappa_off": 1.0
+      },
+      "label": "Lyapunov_38"
+    },
+    {
+      "method": "Static+Guard",
+      "parameters": {
+        "guard_soc": 0.75
+      },
+      "label": "Static+Guard_45"
+    },
+    {
+      "method": "Static+Guard",
+      "parameters": {
+        "guard_soc": 0.8
+      },
+      "label": "Static+Guard_46"
+    },
+    {
+      "method": "Static+Guard",
+      "parameters": {
+        "guard_soc": 0.9
+      },
+      "label": "Static+Guard_47"
+    }
+  ],
+  "seeds": [
+    1000,
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009
+  ],
+  "config": {
+    "seed": 1000,
+    "planes": 24,
+    "per_plane": 24,
+    "orbits": 2,
+    "slots_per_orbit": 96,
+    "flows": 288,
+    "paths": 4,
+    "routing": "hybrid",
+    "medium": "rf",
+    "interference_db": -10.0,
+    "preset": "tight",
+    "beta_deg": 0.0,
+    "load": 0.65,
+    "traffic": "mmpp",
+    "initial_soc": 0.95,
+    "base_w": 55.0,
+    "solar_w": 500.0,
+    "alpha": 0.01,
+    "lam": 0.1,
+    "epsilon": 0.1,
+    "rho": 0.02,
+    "utility_s_bps": 1000000000.0,
+    "max_iterations": 200,
+    "tolerance": 0.001,
+    "guard_soc": 0.3,
+    "artificial_eclipse": 0.0,
+    "dt_override_s": 0.0,
+    "delay_s": 0.0,
+    "substep_s": 0.0,
+    "demand_mode": "cities",
+    "heterogeneous": false,
+    "capacity_j": 783756.3498013499,
+    "dod_max": 0.3,
+    "cut_soc": 0.1,
+    "sleep_w": 2.0,
+    "acquisition_s": 20.0,
+    "kappa_off": 1.0,
+    "xi_wake": 0.3,
+    "minimum_hold_slots": 2,
+    "wake_slack_w": 5.0,
+    "rho_energy": 1.4,
+    "dual_eta": 0.1,
+    "dual_warm": "zero",
+    "lyapunov_lambda": 0.5,
+    "lyapunov_theta": 0.6,
+    "utilization_sleep_threshold": 0.05
+  }
+}

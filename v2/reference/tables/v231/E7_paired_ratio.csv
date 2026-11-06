@@ -1,0 +1,6 @@
+cell,metric,total_seeds,zero_denominator_seeds,negative_denominator_seeds,minimum_absolute_nonzero_denominator_bits,estimand,n,mean,ci95_low,ci95_high
+H_275_beta_0_soc_0.95,(HBAG-V1)/(V0-V1),20,0,0,165312776436753.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.7499503331655035,0.7252391068879449,0.7739790581731985
+H_275_beta_60_soc_0.95,(HBAG-V1)/(V0-V1),20,0,0,255032849685766.5,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.8359725198710153,0.8130901714438536,0.8587576943167894
+H_500_beta_0_soc_0.8,(HBAG-V1)/(V0-V1),20,0,0,179008891613359.5,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.7031533198214017,0.6790561684914603,0.7259861917610629
+H_500_beta_0_soc_0.95,(HBAG-V1)/(V0-V1),20,0,0,164810103474858.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.749351566681372,0.7219308621853606,0.7755027597613958
+H_500_beta_60_soc_0.95,(HBAG-V1)/(V0-V1),20,0,0,254488466735981.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.8372457741938117,0.81491801045049,0.8593760300045342

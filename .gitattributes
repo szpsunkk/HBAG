@@ -1,0 +1,4 @@
+# Preserve scientific source and evidence bytes across platforms.
+v2/** -text
+# The archived CSVs use the standard csv.writer CRLF record terminator.
+v2/reference/tables/** whitespace=cr-at-eol

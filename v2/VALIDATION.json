@@ -1,0 +1,98 @@
+{
+  "release": "2.0.0",
+  "checked_at_utc": "2026-11-06T03:50:38.157556+00:00",
+  "python": "3.8.3",
+  "platform": {
+    "system": "Linux",
+    "machine": "x86_64"
+  },
+  "clean_environment": {
+    "isolated_from_system_site_packages": true,
+    "pip": "25.0.1",
+    "dependencies": {
+      "numpy": "1.24.4",
+      "scipy": "1.10.1",
+      "networkx": "2.8.8",
+      "cvxpy": "1.5.2",
+      "clarabel": "0.9.0",
+      "ecos": "2.0.14",
+      "osqp": "0.6.7.post3",
+      "scs": "3.2.7.post2",
+      "matplotlib": "3.7.5",
+      "pytest": "7.4.4"
+    },
+    "pytest": {
+      "passed": 136,
+      "failed": 0
+    },
+    "smoke": {
+      "passed": true,
+      "not_a_paper_result": true,
+      "results": [
+        {
+          "method": "V0",
+          "delivered_bits": 215275595118224.22,
+          "esr": 0.822265625
+        },
+        {
+          "method": "V1",
+          "delivered_bits": 173827083044489.97,
+          "esr": 1.0
+        },
+        {
+          "method": "HBAG",
+          "delivered_bits": 177514418723291.7,
+          "esr": 1.0
+        }
+      ]
+    },
+    "smoke_matches_original_environment_exactly": true,
+    "statistical_report_matches_original_environment_byte_for_byte": true
+  },
+  "reference_checks": {
+    "passed": true,
+    "unaltered_scientific_files": 56,
+    "archived_runs": 4465,
+    "matched_table_means": 788,
+    "matched_seed_paired_bootstrap_cells": 25,
+    "matched_corrected_rf_and_delay_rows": 62,
+    "rf_grid_fallback_disclosed": true
+  },
+  "full_scale_validation": {
+    "seed": 1000,
+    "satellites": 576,
+    "orbits": 3,
+    "results": [
+      {
+        "seed": 1000,
+        "method": "HBAG",
+        "exact_scientific_match": true,
+        "differing_fields": [],
+        "delivered_bits": 2590412833952263.0
+      },
+      {
+        "seed": 1000,
+        "method": "V1",
+        "exact_scientific_match": true,
+        "differing_fields": [],
+        "delivered_bits": 2432664341474558.0
+      }
+    ],
+    "numerical_environment": "Original scientific environment: CPython 3.8.3, NumPy 1.24.4, SciPy 1.10.1, CVXPY 1.5.2, Clarabel 0.9.0",
+    "comparison": "Exact scientific-summary comparison using hbag3.v24_runtime.compare; excludes timing, configuration, source and storage metadata."
+  },
+  "ppo_checkpoint_check": {
+    "torch": "2.4.1+cu121",
+    "device": "CPU",
+    "training_steps": 4096,
+    "parameters": 1414,
+    "state_dict_loaded": true,
+    "finite_forward_pass": true
+  },
+  "limits": [
+    "The complete multi-day formal experiment suite was not rerun for this packaging release.",
+    "The full-scale validation regression was performed in the original numerical environment; isolated-environment checks cover all unit tests, the smoke run and evidence recalculation.",
+    "PPO dependencies were not installed in the clean base environment; checkpoint loading and CPU inference were checked in the original environment.",
+    "GitHub Actions results are separate from these local checks."
+  ]
+}

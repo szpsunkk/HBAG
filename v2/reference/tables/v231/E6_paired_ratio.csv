@@ -1,0 +1,6 @@
+cell,metric,total_seeds,zero_denominator_seeds,negative_denominator_seeds,minimum_absolute_nonzero_denominator_bits,estimand,n,mean,ci95_low,ci95_high
+K1_distance,(HBAG-V1)/(V0-V1),20,0,0,291344742893056.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.40443725905012384,0.38249120245578067,0.4259672166450716
+K3_distance,(HBAG-V1)/(V0-V1),20,0,0,319903638287022.25,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.34850861151971835,0.32546818107250947,0.3717019582598013
+K3_hops,(HBAG-V1)/(V0-V1),20,0,0,312750641518853.5,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.3085553808125525,0.2895067793749047,0.3273225471301932
+K4_hybrid,(HBAG-V1)/(V0-V1),20,0,0,335321958314428.25,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.3271969632197026,0.30477512732974765,0.3505474843462571
+K5_hops,(HBAG-V1)/(V0-V1),20,0,0,319814481451307.0,Mean of per-seed paired ratios; conditional on nonzero denominator when undefined seeds exist,20,0.2921259560667052,0.2684231851634023,0.3156112927125249

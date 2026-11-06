@@ -1,0 +1,47 @@
+{
+  "passed": true,
+  "rows": [
+    {
+      "seed": 1000,
+      "method": "HBAG",
+      "passed": true,
+      "summary_differences": [],
+      "slot_differences": [],
+      "slots": 288,
+      "dt_s": 59.68882384723548,
+      "delivered_bits": 2590412833952263.0
+    },
+    {
+      "seed": 1000,
+      "method": "V1",
+      "passed": true,
+      "summary_differences": [],
+      "slot_differences": [],
+      "slots": 288,
+      "dt_s": 59.68882384723548,
+      "delivered_bits": 2432664341474558.0
+    },
+    {
+      "seed": 1001,
+      "method": "HBAG",
+      "passed": true,
+      "summary_differences": [],
+      "slot_differences": [],
+      "slots": 288,
+      "dt_s": 59.68882384723548,
+      "delivered_bits": 1432919472414902.5
+    },
+    {
+      "seed": 1001,
+      "method": "V1",
+      "passed": true,
+      "summary_differences": [],
+      "slot_differences": [],
+      "slots": 288,
+      "dt_s": 59.68882384723548,
+      "delivered_bits": 1296731339903082.2
+    }
+  ],
+  "comparison": "Exact float64 JSON values for all scientific summary and per-slot ledger fields. Only source/config/manifest/storage metadata and wall-clock timings excluded; no numerical tolerance.",
+  "protocol": "Fresh pristine and corrected runs; frozen optical rho=1.4 parameters, 576 satellites, 288 flows, three orbits; validation seeds 1000,1001. E2 test-only central shadows are not enabled on validation runs."
+}

@@ -1,0 +1,315 @@
+{
+  "state": "PASS",
+  "plan_version": "v2.3",
+  "source_fingerprint": "39a8e8dfc58e12af828ddd70837ee8066bb5413863fdce15ce1040f113e7ed66",
+  "time": "2026-11-02T15:13:43.318716+09:00",
+  "load": 0.65,
+  "flows": 288,
+  "capacity_by_rho": {
+    "0.6": 1828764.8162031497,
+    "1.0": 1097258.88972189,
+    "1.2": 914382.4081015749,
+    "1.4": 783756.3498013499,
+    "1.6": 685786.8060761812
+  },
+  "selected_by_rho": {
+    "1.2": {
+      "HBAG": {
+        "method": "HBAG",
+        "parameters": {
+          "dual_eta": 0.03,
+          "dual_warm": "zero",
+          "kappa_off": 0.5
+        },
+        "label": "HBAG_00",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1642667064579456.2,
+        "mean_terminal_energy_j": 633652290.8983976
+      },
+      "HBAG-xi": {
+        "method": "HBAG-xi",
+        "parameters": {
+          "lam": 0.02,
+          "kappa_off": 1.0
+        },
+        "label": "HBAG-xi_25",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1597775946746610.5,
+        "mean_terminal_energy_j": 444801119.1394758
+      },
+      "Lyapunov": {
+        "method": "Lyapunov",
+        "parameters": {
+          "lyapunov_lambda": 2.0,
+          "lyapunov_theta": 0.6,
+          "kappa_off": 1.0
+        },
+        "label": "Lyapunov_38",
+        "n": 10,
+        "eligible": false,
+        "mean_esr": 0.9973334418402778,
+        "min_esr": 0.9953974971064815,
+        "mean_delivered_bits": 1629161433673813.8,
+        "mean_terminal_energy_j": 533180665.35334957
+      },
+      "HBAG-Lyap": {
+        "method": "HBAG-Lyap",
+        "parameters": {
+          "lyapunov_lambda": 0.1,
+          "lyapunov_theta": 0.6,
+          "kappa_off": 1.0
+        },
+        "label": "HBAG-Lyap_40",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1627378527867274.0,
+        "mean_terminal_energy_j": 547165253.9329575
+      },
+      "Static+Guard": {
+        "method": "Static+Guard",
+        "parameters": {
+          "guard_soc": 0.9
+        },
+        "label": "Static+Guard_47",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1201368117832194.0,
+        "mean_terminal_energy_j": 495406669.11261666
+      },
+      "Util-Sleep": {
+        "method": "Util-Sleep",
+        "parameters": {
+          "utilization_sleep_threshold": 0.1
+        },
+        "label": "Util-Sleep_50",
+        "n": 10,
+        "eligible": false,
+        "mean_esr": 0.9991753472222221,
+        "min_esr": 0.9985984519675926,
+        "mean_delivered_bits": 1204909677509425.5,
+        "mean_terminal_energy_j": 361929015.82587373
+      }
+    },
+    "1.4": {
+      "HBAG": {
+        "method": "HBAG",
+        "parameters": {
+          "dual_eta": 0.3,
+          "dual_warm": "zero",
+          "kappa_off": 2.0
+        },
+        "label": "HBAG_14",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1566237217374647.5,
+        "mean_terminal_energy_j": 593292264.9503793
+      },
+      "HBAG-xi": {
+        "method": "HBAG-xi",
+        "parameters": {
+          "lam": 0.02,
+          "kappa_off": 2.0
+        },
+        "label": "HBAG-xi_26",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1519344088235459.5,
+        "mean_terminal_energy_j": 441707953.80285406
+      },
+      "Lyapunov": {
+        "method": "Lyapunov",
+        "parameters": {
+          "lyapunov_lambda": 2.0,
+          "lyapunov_theta": 0.6,
+          "kappa_off": 1.0
+        },
+        "label": "Lyapunov_38",
+        "n": 10,
+        "eligible": false,
+        "mean_esr": 0.9888671875,
+        "min_esr": 0.9839228877314815,
+        "mean_delivered_bits": 1622909512763171.8,
+        "mean_terminal_energy_j": 527895881.6502879
+      },
+      "HBAG-Lyap": {
+        "method": "HBAG-Lyap",
+        "parameters": {
+          "lyapunov_lambda": 0.5,
+          "lyapunov_theta": 0.6,
+          "kappa_off": 1.0
+        },
+        "label": "HBAG-Lyap_42",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1553072453742504.5,
+        "mean_terminal_energy_j": 523805681.28907025
+      },
+      "Static+Guard": {
+        "method": "Static+Guard",
+        "parameters": {
+          "guard_soc": 0.9
+        },
+        "label": "Static+Guard_47",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1132891112323067.5,
+        "mean_terminal_energy_j": 485765232.73046035
+      },
+      "Util-Sleep": {
+        "method": "Util-Sleep",
+        "parameters": {
+          "utilization_sleep_threshold": 0.1
+        },
+        "label": "Util-Sleep_50",
+        "n": 10,
+        "eligible": false,
+        "mean_esr": 0.9907642505787038,
+        "min_esr": 0.9869158709490741,
+        "mean_delivered_bits": 1204909677509425.5,
+        "mean_terminal_energy_j": 361929015.82587373
+      }
+    },
+    "1.6": {
+      "HBAG": {
+        "method": "HBAG",
+        "parameters": {
+          "dual_eta": 1.0,
+          "dual_warm": "zero",
+          "kappa_off": 2.0
+        },
+        "label": "HBAG_20",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1451597638243580.5,
+        "mean_terminal_energy_j": 560974044.9143841
+      },
+      "HBAG-xi": {
+        "method": "HBAG-xi",
+        "parameters": {
+          "lam": 0.02,
+          "kappa_off": 0.5
+        },
+        "label": "HBAG-xi_24",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1398103640078464.0,
+        "mean_terminal_energy_j": 401811001.995612
+      },
+      "Lyapunov": {
+        "method": "Lyapunov",
+        "parameters": {
+          "lyapunov_lambda": 2.0,
+          "lyapunov_theta": 0.6,
+          "kappa_off": 1.0
+        },
+        "label": "Lyapunov_38",
+        "n": 10,
+        "eligible": false,
+        "mean_esr": 0.9743064597800926,
+        "min_esr": 0.9661729600694444,
+        "mean_delivered_bits": 1614659558466449.8,
+        "mean_terminal_energy_j": 523382551.2751315
+      },
+      "HBAG-Lyap": {
+        "method": "HBAG-Lyap",
+        "parameters": {
+          "lyapunov_lambda": 2.0,
+          "lyapunov_theta": 0.6,
+          "kappa_off": 1.0
+        },
+        "label": "HBAG-Lyap_44",
+        "n": 10,
+        "eligible": true,
+        "mean_esr": 1.0,
+        "min_esr": 1.0,
+        "mean_delivered_bits": 1440422872045606.5,
+        "mean_terminal_energy_j": 502857078.77642995
+      },
+      "Static+Guard": {
+        "method": "Static+Guard",
+        "parameters": {
+          "guard_soc": 0.9
+        },
+        "label": "Static+Guard_47",
+        "n": 10,
+        "eligible": false,
+        "mean_esr": 0.9999909577546295,
+        "min_esr": 0.9999909577546297,
+        "mean_delivered_bits": 1087849305443741.2,
+        "mean_terminal_energy_j": 478269597.17281884
+      },
+      "Util-Sleep": {
+        "method": "Util-Sleep",
+        "parameters": {
+          "utilization_sleep_threshold": 0.1
+        },
+        "label": "Util-Sleep_50",
+        "n": 10,
+        "eligible": false,
+        "mean_esr": 0.9665427879050925,
+        "min_esr": 0.959644458912037,
+        "mean_delivered_bits": 1204909677509425.5,
+        "mean_terminal_energy_j": 361929015.82587373
+      }
+    }
+  },
+  "validation_seeds": [
+    1000,
+    1001,
+    1002,
+    1003,
+    1004,
+    1005,
+    1006,
+    1007,
+    1008,
+    1009
+  ],
+  "test_seeds": [
+    4000,
+    4001,
+    4002,
+    4003,
+    4004,
+    4005,
+    4006,
+    4007,
+    4008,
+    4009,
+    4010,
+    4011,
+    4012,
+    4013,
+    4014,
+    4015,
+    4016,
+    4017,
+    4018,
+    4019
+  ],
+  "test_seeds_executed": [],
+  "selection_scope": "HBAG 24 points x 3 rhos x 10 validation seeds; all other parameters reused from verified v2.2",
+  "reused_selection": "results_r2/archive/v22_before_v23_20261102T110902/results_r2/E11_validation/frozen.json"
+}
